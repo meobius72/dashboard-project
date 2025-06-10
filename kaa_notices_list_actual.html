@@ -1,0 +1,1814 @@
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>항공교육훈련포털</title>
+<meta name="title" content="항공교육훈련포털"/>
+<meta name="author" content="항공교육훈련포털"/>
+<meta name="keywords" content="항공교육훈련포털"/>
+<link href="/assets/css/font.css" rel="stylesheet" type="text/css" />
+<link href="/assets/css/uikit.css" rel="stylesheet" type="text/css" />
+<link href="/assets/css/style.css" rel="stylesheet" type="text/css" />
+<link href="/assets/css/new_main.css" rel="stylesheet" type="text/css" /><!-- ★ 이거 추가됨 -->
+<link href="/html/script/js/jquery/smoothness/jquery-ui-1.8.9.custom.css" rel="stylesheet" type="text/css" />
+<link rel="shortcut icon" href="/assets/images/favicon.ico" type="image/x-icon" />
+ 
+<script src="/html/script/js/jquery/jquery-1.7.2.min.js" ></script>
+<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+<script src="/assets/js/jquery-1.11.3.min.js"></script>
+
+
+<link rel="stylesheet" href="/theme/pubs/css/common.css" />
+<link rel="stylesheet" href="/theme/pubs/css/board.css" />
+<link rel="stylesheet" href="/theme/pubs/css/info.css" />
+<link rel="stylesheet" href="/theme/pubs/css/member.css" />
+
+
+
+<script type="text/javascript" src="/html/script/js/jquery/jquery-ui-1.8.21.custom.min.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/bootstrap-transition.js"></script>
+<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+<!-- <script type="text/javascript" src="/html/script/js/jquery/jquery.cookie.js"></script> -->
+<!-- <script type="text/javascript" src="/html/script/js/jquery/jquery.uniform.min.js"></script> -->
+<script type="text/javascript" src="/html/script/js/jquery/jquery.noty.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/jquery.uploadify-3.1.min.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/jquery.history.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/jquery.multiselect.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/vendor/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/jquery.iframe-transport.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/jstree.1.0.1/jquery.jstree.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/util.tree.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/plugin/jquery.validate.js"></script>
+<script type="text/javascript" src="/html/script/js/jquery/jquery.validate.default.js"></script>
+
+
+</head>
+
+<body>
+<div class="color-1">	
+	<div class="skip">
+		<a href="#content">본문으로 바로가기</a><a href="#navigation">메뉴로 바로가기</a>
+	</div>
+</div>
+
+	
+	<header>
+		
+
+ 
+
+
+
+<script type="text/javascript">
+	//세션타이머 기능
+	var iSecond; //초단위로 환산
+	var timerchecker = null;
+
+	window.onload = function() {
+		
+	}
+
+	function fncClearTime() {
+		iSecond = 3600;
+	}
+
+	
+	Lpad = function(str, len) {
+		str = str + "";
+		while (str.length < len) {
+			str = "0" + str;
+		}
+
+		return str;
+	}
+
+
+	initTimer = function() {
+
+		var timer = document.getElementById("timer");
+		rHour = parseInt(iSecond / 3600);
+		rHour = rHour % 60;
+		rMinute = parseInt(iSecond / 60);
+		rMinute = rMinute % 60;
+		rSecond = iSecond % 60;
+
+		if (iSecond > 0) {
+			timer.innerHTML = //"&nbsp;" + Lpad(rHour, 2) + "시간 "+ 
+			Lpad(rMinute, 2) + "분 " + Lpad(rSecond, 2) + "초 ";
+			iSecond--;
+			timerchecker = setTimeout("initTimer()", 1000); // 1초 간격으로 체크
+		} else {
+			logoutUser();
+		}
+
+	}
+
+	function refreshTimer() {
+
+		var xhr = initAjax();
+		xhr.open("POST", "/pubs/home/mainIntroAction.do", false);
+		xhr.send();
+		fncClearTime();
+
+	}
+
+	function logoutUser() {
+
+		clearTimeout(timerchecker);
+/* 		var xhr = initAjax();
+		xhr.open("POST", "/pubs/home/logoutAction.do", false);
+		xhr.send();
+		location.reload(); */
+		location.href = '/pubs/home/logoutTimeOutAction.do';
+
+	}
+
+	function initAjax() { // 브라우저에 따른 AjaxObject 인스턴스 분기 처리
+
+		var xmlhttp;
+		if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp = new XMLHttpRequest();
+		} else {// code for IE6, IE5
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+
+		return xmlhttp;
+
+	}
+	
+	function fnOpenPage(url){
+		window.open(url);
+	}
+	
+	function moveUrl(url) {
+		location.href = url;
+	}
+	
+</script>
+		<div class="gnb">
+			<div class="uk-container">
+				<ul>
+					<li><a href="http://www.kotsa.or.kr" target="_blank" rel="noopener noreferrer" title="새창으로 이동">한국교통안전공단</a></li>
+					<li><a href="http://www.molit.go.kr" target="_blank" rel="noopener noreferrer" title="새창으로 이동">국토교통부</a></li>
+					<li><a href="https://www.kaa.atims.kr/support" target="_blank" rel="noopener noreferrer" title="새창으로 이동">항공교육훈련 교육기관 지원시스템</a></li>
+				</ul>
+				<ol>
+					
+					
+						<!-- 실서버 -->
+						<!-- <li><a href="https://www.kaa.atims.kr/pubs/home/loginAction.do">로그인</a></li> -->
+						<!-- 개발서버용 -->
+						<li><a href="/pubs/home/loginAction.do">로그인</a></li>
+						<li><a href="/pubs/member/JoinAgreementAction.do">회원가입</a></li>
+					 
+				</ol>
+			</div>
+		</div>
+ 
+ 		<div class="uk-container">
+		    <div class="logo">
+		    	<a href="/"><h1 class="skip">항공교육훈련포털 로고</h1></a>
+		        
+		    </div> 
+ 
+ 			<h2 class="skip">메인메뉴</h2>
+		    <nav id="navigation">
+			    <ul class="new-main-nav">
+			    
+				    <li><a href="#" ><span><i class="ts-icon"></i>교육과정 안내</span></a><!-- ★ 선택됐을때 -->
+				    	<div class="submenu" style="display: none;">
+							<div class="tit"><strong><i class="ts-icon"></i>교육과정 안내</strong></div> 
+							<div>
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">공단교육</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/home/info/flightInfo.do","5002","4")'>항공종사자</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/home/info/miniInfo.do","5003","4")'>경량항공기</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/home/info/droneInfo.do","5004","4")'>초경량비행장치</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">자격안내</a></dt>
+									
+									<dd><a href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=02010200","5070","4")' target="_blank" rel="noopener noreferrer">자격안내</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">관련법령</a></dt>
+									
+									<dd><a href="#'" onclick='movePage1("http://www.law.go.kr/lsSc.do?tabMenuId=tab18&query=%ED%95%AD%EA%B3%B5%EC%95%88%EC%A0%84%EB%B2%95#undefined","5071","4")' target="_blank" rel="noopener noreferrer">관련법령</a></dd>
+									
+								</dl>
+								
+								 
+							</div>
+						</div>
+				    </li> 
+				    
+				    <li><a href="#" ><span>교육신청 및 조회</span></a><!-- ★ 선택됐을때 -->
+				    	<div class="submenu" style="display: none;">
+							<div class="tit"><strong>교육신청 및 조회</strong></div> 
+							<div>
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">교육일정 조회</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/arts/list.do","5009","4")'>항공종사자</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/mini/list.do","5010","4")'>경량항공기</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/drone/list.do","5011","4")'>초경량비행장치</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">입과자격</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/atnlcReqst/view/selectIndvYn.do","5013","4")'>입과자격 신청</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/atnlcReqst/view/list.do","5014","4")'>입과자격 신청 조회</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">교육접수</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/edcMngt/view/reqstList.do","5016","4")'>접수신청</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptList.do","5017","4")'>접수내역</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptCanclList.do","5018","4")'>접수취소</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptPrintList.do","6017","4")'>접수증 출력</a></dd>
+									
+								</dl>
+								
+								 
+							</div>
+						</div>
+				    </li> 
+				    
+				    <li><a href="#" ><span>전문교육기관 안내</span></a><!-- ★ 선택됐을때 -->
+				    	<div class="submenu" style="display: none;">
+							<div class="tit"><strong>전문교육기관 안내</strong></div> 
+							<div>
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">전문교육기관 안내</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/course/institution/1/list.do","5025","4")'>조종</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/course/institution/2/list.do","5026","4")'>정비</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/course/institution/3/list.do","5027","4")'>관제</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/course/institution/4/list.do","5028","4")'>초경량비행장치</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/course/institution/6/list.do","5029","4")'>경량항공기</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/course/institution/5/list.do","5030","4")'>항공교육</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">인가절차</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/permission/control/info.do","5032","4")'>조종 · 정비 · 관제(ATO)</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/permission/mini/info.do","5033","4")'>경량항공기 </a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/permission/drone/info.do","5034","4")'>초경량비행장치</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">인가신청 및 조회</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/permission/apply.do","5036","4")'>전문교육기관 인가 신청</a></dd>
+									
+								</dl>
+								
+								 
+							</div>
+						</div>
+				    </li> 
+				    
+				    <li><a href="#" ><span>온라인강의실</span></a><!-- ★ 선택됐을때 -->
+				    	<div class="submenu" style="display: none;">
+							<div class="tit"><strong>온라인강의실</strong></div> 
+							<div>
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">온라인교육 시스템 소개</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/info.do","5072","4")'>온라인 교육시스템 소개</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">나의 강의실</a></dt>
+									
+									<dd><a href="#" onclick="goLectureRoom2();return false;">나의 강의실</a></dd>
+									
+									<dd><a href="#" onclick="goLectureMypage();return false;">이수증 출력</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">수강신청</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/allCourseList.do","5042","4")'>전체교육과정</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/01/courseList.do","5043","4")'>항공인적요인 분야</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/04/courseList.do","5045","4")'>항공레져스포츠 분야</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/02/courseList.do","5046","4")'>항공안전관리 분야</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/03/courseList.do","5047","4")'>항공환경관리 분야</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/05/courseList.do","6009","4")'>법정교육 분야</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/06/courseList.do","6011","4")'>항공의학 분야</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/edu/09/courseList.do","6020","4")'>항공보안 분야</a></dd>
+									
+								</dl>
+								
+								 
+							</div>
+						</div>
+				    </li> 
+				    
+				    <li><a href="#" ><span>고객지원</span></a><!-- ★ 선택됐을때 -->
+				    	<div class="submenu" style="display: none;">
+							<div class="tit"><strong>고객지원</strong></div> 
+							<div>
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">공지사항</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/notice/notice/ListAction.do","5074","4")'>공지사항</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/notice/course/ListAction.do?subNum=1","5050","4")'>교육기관 NEWS</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">지식자료</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/textbook/1/opinionAttachListAction.do","5052","4")'>표준교재</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/textbook/correction/correctionListAction.do","6010","4")'>표준교재 정정신고</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/textbook/decreeListAction.do?subNum=3","5053","4")'>기타 참고자료</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/AccidentCase/ListAction.do","6022","4")'>사고사례</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">FAQ</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/notice/faq/faqListAction.do?subNum=5","5075","4")'>FAQ</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">사이트 안내</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/home/infoListAction.do","5077","4")'>포털소개</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/home/infoEngListAction.do","5078","4")'>English</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/home/etc/agreementViewAction.do","5079","4")'>회원약관</a></dd>
+									
+									<dd><a href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=07020000","5080","4")' target="_blank" rel="noopener noreferrer">개인정보처리방침</a></dd>
+									
+									<dd><a href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=07040000","5081","4")' target="_blank" rel="noopener noreferrer">이메일무단수집거부</a></dd>
+									
+								</dl>
+								
+								 
+							</div>
+						</div>
+				    </li> 
+				    
+				    <li><a href="#" ><span>마이페이지</span></a><!-- ★ 선택됐을때 -->
+				    	<div class="submenu" style="display: none;">
+							<div class="tit"><strong>마이페이지</strong></div> 
+							<div>
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">나의 교육관리</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/complList.do","5062","4")'>(집체)교육이수 내역</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/printCompl.do","5063","4")'>(집체)이수증 출력</a></dd>
+									
+									<dd><a href="#" onclick="goLectureMypage();return false;">(온라인)이수증 출력</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">전문교육기관 승인신청</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/blngAuth/view/write.do","5065","4")'>담당자 승인신청</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/blngAuth/view/list.do","5066","4")'>결과 확인</a></dd>
+									
+								</dl>
+								
+							 	
+								<dl>
+								<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+									<dt><a href="#">개인정보 관리</a></dt>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/member/CheckMemberInfoAction.do","5068","4")'>개인정보 수정</a></dd>
+									
+									<dd><a href="#" onclick='movePage1("/pubs/coltvedc/withDrawal/view/check.do","5069","4")'>회원탈퇴</a></dd>
+									
+								</dl>
+								
+								 
+							</div>
+						</div>
+				    </li> 
+				    
+				</ul>
+				<a class="hamburger menu-btn" href="#" title="모바일 메뉴 펼침">
+			        <div></div>
+			        <div></div>
+			        <div></div>
+			    </a>
+			</nav>   
+			 <a class="new-hamburger" href="#">
+		        <div></div>
+		        <div></div> 
+		        <div></div>
+		    </a>
+			
+		</div>		
+		<div class="submenu-bg" style="display: none;"></div>
+ 
+  		<div class="sitemap dialog" id="sitemap">
+			
+			<div class="allmenu-list">
+			  	<a href="#" class="modal-close" aria-label="Close Modal Box">×</a>
+				 
+				<div>
+				<div class="tit"><strong>교육과정 안내</strong></div>
+					<div>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">공단교육</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/home/info/flightInfo.do","5002","4")'>항공종사자</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/home/info/miniInfo.do","5003","4")'>경량항공기</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/home/info/droneInfo.do","5004","4")'>초경량비행장치</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">자격안내</a></dt> 	
+				 		
+				 			<dd><a  href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=02010200","5070","4")' target="_blank" rel="noopener noreferrer">자격안내</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">관련법령</a></dt> 	
+				 		
+				 			<dd><a  href="#'" onclick='movePage1("http://www.law.go.kr/lsSc.do?tabMenuId=tab18&query=%ED%95%AD%EA%B3%B5%EC%95%88%EC%A0%84%EB%B2%95#undefined","5071","4")' target="_blank" rel="noopener noreferrer">관련법령</a></dd>
+				 		
+				 		</dl>
+				 	
+				 	</div>
+				 </div>
+				 
+				<div>
+				<div class="tit"><strong>교육신청 및 조회</strong></div>
+					<div>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">교육일정 조회</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/arts/list.do","5009","4")'>항공종사자</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/mini/list.do","5010","4")'>경량항공기</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/drone/list.do","5011","4")'>초경량비행장치</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">입과자격</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/atnlcReqst/view/selectIndvYn.do","5013","4")'>입과자격 신청</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/atnlcReqst/view/list.do","5014","4")'>입과자격 신청 조회</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">교육접수</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/edcMngt/view/reqstList.do","5016","4")'>접수신청</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptList.do","5017","4")'>접수내역</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptCanclList.do","5018","4")'>접수취소</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptPrintList.do","6017","4")'>접수증 출력</a></dd>
+				 		
+				 		</dl>
+				 	
+				 	</div>
+				 </div>
+				 
+				<div>
+				<div class="tit"><strong>전문교육기관 안내</strong></div>
+					<div>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">전문교육기관 안내</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/course/institution/1/list.do","5025","4")'>조종</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/course/institution/2/list.do","5026","4")'>정비</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/course/institution/3/list.do","5027","4")'>관제</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/course/institution/4/list.do","5028","4")'>초경량비행장치</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/course/institution/6/list.do","5029","4")'>경량항공기</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/course/institution/5/list.do","5030","4")'>항공교육</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">인가절차</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/permission/control/info.do","5032","4")'>조종 · 정비 · 관제(ATO)</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/permission/mini/info.do","5033","4")'>경량항공기 </a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/permission/drone/info.do","5034","4")'>초경량비행장치</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">인가신청 및 조회</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/permission/apply.do","5036","4")'>전문교육기관 인가 신청</a></dd>
+				 		
+				 		</dl>
+				 	
+				 	</div>
+				 </div>
+				 
+				<div>
+				<div class="tit"><strong>온라인강의실</strong></div>
+					<div>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">온라인교육 시스템 소개</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/info.do","5072","4")'>온라인 교육시스템 소개</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">나의 강의실</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick="goLectureRoom2();return false;">나의 강의실</a></dd>
+				 		
+				 			<dd><a  href="#" onclick="goLectureMypage();return false;">이수증 출력</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">수강신청</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/allCourseList.do","5042","4")'>전체교육과정</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/01/courseList.do","5043","4")'>항공인적요인 분야</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/04/courseList.do","5045","4")'>항공레져스포츠 분야</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/02/courseList.do","5046","4")'>항공안전관리 분야</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/03/courseList.do","5047","4")'>항공환경관리 분야</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/05/courseList.do","6009","4")'>법정교육 분야</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/06/courseList.do","6011","4")'>항공의학 분야</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/edu/09/courseList.do","6020","4")'>항공보안 분야</a></dd>
+				 		
+				 		</dl>
+				 	
+				 	</div>
+				 </div>
+				 
+				<div>
+				<div class="tit"><strong>고객지원</strong></div>
+					<div>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">공지사항</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/notice/notice/ListAction.do","5074","4")'>공지사항</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/notice/course/ListAction.do?subNum=1","5050","4")'>교육기관 NEWS</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">지식자료</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/textbook/1/opinionAttachListAction.do","5052","4")'>표준교재</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/textbook/correction/correctionListAction.do","6010","4")'>표준교재 정정신고</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/textbook/decreeListAction.do?subNum=3","5053","4")'>기타 참고자료</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/AccidentCase/ListAction.do","6022","4")'>사고사례</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">FAQ</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/notice/faq/faqListAction.do?subNum=5","5075","4")'>FAQ</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">사이트 안내</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/home/infoListAction.do","5077","4")'>포털소개</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/home/infoEngListAction.do","5078","4")'>English</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/home/etc/agreementViewAction.do","5079","4")'>회원약관</a></dd>
+				 		
+				 			<dd><a  href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=07020000","5080","4")' target="_blank" rel="noopener noreferrer">개인정보처리방침</a></dd>
+				 		
+				 			<dd><a  href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=07040000","5081","4")' target="_blank" rel="noopener noreferrer">이메일무단수집거부</a></dd>
+				 		
+				 		</dl>
+				 	
+				 	</div>
+				 </div>
+				 
+				<div>
+				<div class="tit"><strong>마이페이지</strong></div>
+					<div>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">나의 교육관리</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/complList.do","5062","4")'>(집체)교육이수 내역</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/printCompl.do","5063","4")'>(집체)이수증 출력</a></dd>
+				 		
+				 			<dd><a  href="#" onclick="goLectureMypage();return false;">(온라인)이수증 출력</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">전문교육기관 승인신청</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/blngAuth/view/write.do","5065","4")'>담당자 승인신청</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/blngAuth/view/list.do","5066","4")'>결과 확인</a></dd>
+				 		
+				 		</dl>
+				 	
+				 		<dl>
+				 		<!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+							<dt><a href="#">개인정보 관리</a></dt> 	
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/member/CheckMemberInfoAction.do","5068","4")'>개인정보 수정</a></dd>
+				 		
+				 			<dd><a  href="#" onclick='movePage1("/pubs/coltvedc/withDrawal/view/check.do","5069","4")'>회원탈퇴</a></dd>
+				 		
+				 		</dl>
+				 	
+				 	</div>
+				 </div>
+				 
+			</div>
+		</div>
+		
+		
+		<!-- mobile menu (이건 그대로) -->
+	    <div class="pushy pushy-right">
+	        <div class="pushy-content">
+			    <div class="gnb-group">
+			        
+			    
+				    <button class="uk-button uk-button-default uk-button-small" onclick="moveUrl('https://www.kaa.atims.kr/pubs/home/loginAction.do');"><i data-uk-icon="icon: lock; ratio: 0.6"></i>로그인</button>
+				    <button class="uk-button uk-button-default uk-button-small" onclick="moveUrl('https://www.kaa.atims.kr/pubs/member/JoinAgreementAction.do');"><i data-uk-icon="icon: user; ratio: 0.6"></i>회원가입</button>
+				     
+				</div>
+	            <ul>
+	            	
+	                <li class="pushy-submenu">
+	                    <a href="#">교육과정 안내</a>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">공단교육</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/home/info/flightInfo.do","5002","4")'>항공종사자</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/home/info/miniInfo.do","5003","4")'>경량항공기</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/home/info/droneInfo.do","5004","4")'>초경량비행장치</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">자격안내</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=02010200","5070","4")' target="_blank" rel="noopener noreferrer">자격안내</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">관련법령</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#'" onclick='movePage1("http://www.law.go.kr/lsSc.do?tabMenuId=tab18&query=%ED%95%AD%EA%B3%B5%EC%95%88%EC%A0%84%EB%B2%95#undefined","5071","4")' target="_blank" rel="noopener noreferrer">관련법령</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                    
+	                </li>
+	                
+	                <li class="pushy-submenu">
+	                    <a href="#">교육신청 및 조회</a>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">교육일정 조회</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/arts/list.do","5009","4")'>항공종사자</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/mini/list.do","5010","4")'>경량항공기</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/drone/list.do","5011","4")'>초경량비행장치</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">입과자격</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/atnlcReqst/view/selectIndvYn.do","5013","4")'>입과자격 신청</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/atnlcReqst/view/list.do","5014","4")'>입과자격 신청 조회</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">교육접수</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/edcMngt/view/reqstList.do","5016","4")'>접수신청</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptList.do","5017","4")'>접수내역</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptCanclList.do","5018","4")'>접수취소</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptPrintList.do","6017","4")'>접수증 출력</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                    
+	                </li>
+	                
+	                <li class="pushy-submenu">
+	                    <a href="#">전문교육기관 안내</a>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">전문교육기관 안내</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/course/institution/1/list.do","5025","4")'>조종</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/course/institution/2/list.do","5026","4")'>정비</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/course/institution/3/list.do","5027","4")'>관제</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/course/institution/4/list.do","5028","4")'>초경량비행장치</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/course/institution/6/list.do","5029","4")'>경량항공기</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/course/institution/5/list.do","5030","4")'>항공교육</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">인가절차</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/permission/control/info.do","5032","4")'>조종 · 정비 · 관제(ATO)</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/permission/mini/info.do","5033","4")'>경량항공기 </a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/permission/drone/info.do","5034","4")'>초경량비행장치</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">인가신청 및 조회</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/permission/apply.do","5036","4")'>전문교육기관 인가 신청</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                    
+	                </li>
+	                
+	                <li class="pushy-submenu">
+	                    <a href="#">온라인강의실</a>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">온라인교육 시스템 소개</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/info.do","5072","4")'>온라인 교육시스템 소개</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">나의 강의실</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick="goLectureRoom2();return false;">나의 강의실</a></li>
+		                		
+		                			<li><a  href="#" onclick="goLectureMypage();return false;">이수증 출력</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">수강신청</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/allCourseList.do","5042","4")'>전체교육과정</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/01/courseList.do","5043","4")'>항공인적요인 분야</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/04/courseList.do","5045","4")'>항공레져스포츠 분야</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/02/courseList.do","5046","4")'>항공안전관리 분야</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/03/courseList.do","5047","4")'>항공환경관리 분야</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/05/courseList.do","6009","4")'>법정교육 분야</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/06/courseList.do","6011","4")'>항공의학 분야</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/edu/09/courseList.do","6020","4")'>항공보안 분야</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                    
+	                </li>
+	                
+	                <li class="pushy-submenu">
+	                    <a href="#">고객지원</a>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">공지사항</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/notice/notice/ListAction.do","5074","4")'>공지사항</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/notice/course/ListAction.do?subNum=1","5050","4")'>교육기관 NEWS</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">지식자료</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/textbook/1/opinionAttachListAction.do","5052","4")'>표준교재</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/textbook/correction/correctionListAction.do","6010","4")'>표준교재 정정신고</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/textbook/decreeListAction.do?subNum=3","5053","4")'>기타 참고자료</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/AccidentCase/ListAction.do","6022","4")'>사고사례</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">FAQ</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/notice/faq/faqListAction.do?subNum=5","5075","4")'>FAQ</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">사이트 안내</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/home/infoListAction.do","5077","4")'>포털소개</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/home/infoEngListAction.do","5078","4")'>English</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/home/etc/agreementViewAction.do","5079","4")'>회원약관</a></li>
+		                		
+		                			<li><a  href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=07020000","5080","4")' target="_blank" rel="noopener noreferrer">개인정보처리방침</a></li>
+		                		
+		                			<li><a  href="#'" onclick='movePage1("https://www.kotsa.or.kr/portal/contents.do?menuCode=07040000","5081","4")' target="_blank" rel="noopener noreferrer">이메일무단수집거부</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                    
+	                </li>
+	                
+	                <li class="pushy-submenu">
+	                    <a href="#">마이페이지</a>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">나의 교육관리</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/complList.do","5062","4")'>(집체)교육이수 내역</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/printCompl.do","5063","4")'>(집체)이수증 출력</a></li>
+		                		
+		                			<li><a  href="#" onclick="goLectureMypage();return false;">(온라인)이수증 출력</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">전문교육기관 승인신청</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/blngAuth/view/write.do","5065","4")'>담당자 승인신청</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/blngAuth/view/list.do","5066","4")'>결과 확인</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                     	
+	                    <ul> 
+	                        <li><a href="#">개인정보 관리</a>
+	                        
+	                        	<ol>
+	                        	
+		                			<li><a  href="#" onclick='movePage1("/pubs/member/CheckMemberInfoAction.do","5068","4")'>개인정보 수정</a></li>
+		                		
+		                			<li><a  href="#" onclick='movePage1("/pubs/coltvedc/withDrawal/view/check.do","5069","4")'>회원탈퇴</a></li>
+		                		 
+		                		</ol>
+		                		
+	                        </li>
+	                    </ul>
+	                    
+	                </li>
+	                 
+	            </ul>
+	        </div>
+	    </div>
+	    <div class="site-overlay"></div>
+	    
+	    
+	    
+			<!-- mobile menu -->
+	    
+		
+
+	       
+	</header>
+
+	<article class="sub" id="content">
+		
+
+
+
+  
+  
+  
+		
+		  
+		
+		 
+		  
+		
+		 
+		  
+		
+		 
+		  
+		
+		 
+		  
+		
+		 
+		  
+		
+		 
+		
+		<div class="subpage-tit bg-2">교육신청 및 조회</div>
+		<!--★ 배경은 메뉴순서대로 bg-1 ~ 6까지 로그인 등 회원가입은 bg-6 -->
+
+		<div class="uk-container">
+	    	<div class="sub-menu">
+				<div class="tit">교육신청 및 조회</div>
+				<ul class="uk-accordion">
+				 
+				    <li class="uk-open"><!-- 하위메뉴 항상 펼쳐있게끔 -->
+				    <!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+				        <a href="#">교육일정 조회</a>
+				        				        	
+				        <div class="uk-accordion-content">
+					        <ol>
+					          	 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/arts/list.do","5009","4")'>항공종사자</a></li>
+				    			 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/mini/list.do","5010","4")'>경량항공기</a></li>
+				    			 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/schdulMngt/view/drone/list.do","5011","4")'>초경량비행장치</a></li>
+				    			  
+				    		</ol> 
+			    		</div>
+				         
+				    </li>
+				 
+				    <li class="uk-open"><!-- 하위메뉴 항상 펼쳐있게끔 -->
+				    <!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+				        <a href="#">입과자격</a>
+				        				        	
+				        <div class="uk-accordion-content">
+					        <ol>
+					          	 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/atnlcReqst/view/selectIndvYn.do","5013","4")'>입과자격 신청</a></li>
+				    			 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/atnlcReqst/view/list.do","5014","4")'>입과자격 신청 조회</a></li>
+				    			  
+				    		</ol> 
+			    		</div>
+				         
+				    </li>
+				 
+				    <li class="uk-open"><!-- 하위메뉴 항상 펼쳐있게끔 -->
+				    <!-- 20230103 박정욱 웹페이지 품질관리 수정-->
+				        <a href="#">교육접수</a>
+				        				        	
+				        <div class="uk-accordion-content">
+					        <ol>
+					          	 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/edcMngt/view/reqstList.do","5016","4")'>접수신청</a></li>
+				    			 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptList.do","5017","4")'>접수내역</a></li>
+				    			 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptCanclList.do","5018","4")'>접수취소</a></li>
+				    			 
+				    				<li><a href="#" onclick='movePage1("/pubs/coltvedc/reqstCtfhv/view/rceptPrintList.do","6017","4")'>접수증 출력</a></li>
+				    			  
+				    		</ol> 
+			    		</div>
+				         
+				    </li>
+				      
+				</ul>
+			</div> 
+		 
+    
+			<!-- sub content -->
+			<h2 class="skip">서브컨텐츠</h2>
+			<section class="sub-content" id="content1">		
+				
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/html/script/js/pubs/notice/notice/new_helpdesk_notice.js"></script>
+<script type="text/javascript">
+<!--<script type="text/javascript" charset="utf-8">-->
+
+	url1 = "/pubs/notice/notice/ListAction.do";
+	url2 = "/pubs/notice/notice/ViewAction.do";
+
+	message1 = "필수 입력값입니다.";
+	message2 = "저장하시겠습니까?";
+	message3 = "200자 이상 입력할 수 없습니다.";
+	message4 = "첨부파일은 한개만 가능합니다.";	
+	message5 = "특수문자는 허용되지 않습니다.";
+	message6 = "공백문자는 허용되지 않습니다.";
+	
+	message10 = "첨부파일은 세개 까지만 가능합니다.";
+	message11 = "첨부된 파일이 없습니다.";
+	
+</script>
+
+<!-- 20210201 캐시화 가능한 SSL 페이지 -->
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="pragma" content="no-cache" />
+<meta http-equiv="expires" content="-1" />
+
+		<!--내용-->
+
+	<h3>공지사항</h3> 
+	<p class="count-result">전체 <span>201</span>건</p>
+    	<div class="uk-overflow-auto">
+			<!-- <table style="table-layout: auto; width: 100%; table-layout: fixed;" class="uk-table uk-table-divider table-list notice-list"  summary="공지사항 목록이며 번호,제목,등록자,등록일, 첨부파일,조회수를 제공하고 제목 링크를 통해 상세페이지로 이동합니다.공지사항에 대한 목록을 확인할 수 있습니다."> -->
+			<table style="table-layout: auto; width: 100%; table-layout: fixed;" class="uk-table uk-table-divider table-list notice-list" >
+				<caption>교육기관공지에 대한 목록</caption> 
+				<colgroup>
+				<!-- 	<col width="6%">
+					<col width="auto">
+					<col width="10%">
+                    <col width="10%">
+					<col width="8%">
+					<col width="5%">  -->
+					<col style="width:6%">
+					<col style="width:auto">
+					<col style="width:10%">
+                    <col style="width:10%">
+					<col style="width:8%">
+					<col style="width:5%"> 
+				</colgroup>
+				<thead>
+					<tr>
+						<th scope="col">번호</th>
+						<th scope="col">제목</th>
+						<th scope="col">등록자</th>
+						<th scope="col">등록일</th>
+						<th scope="col">조회수</th>
+						<th scope="col">첨부</th>
+					</tr>
+				</thead>
+				<tbody> 
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1467')">
+								[공지] `25년 6월 초경량비행장치(무인멀티콥터/유인분야) 조종교육교관과정 교육 일정 안내
+									
+							</a>
+
+						</td>
+						<td>김지민</td>
+						<td>2025.06.09</td>
+						<td>1788</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1476')">
+								[공지] 2025년도 초경량비행장치 전문교육기관 정기점검 알림
+									
+							</a>
+
+						</td>
+						<td>정은서</td>
+						<td>2025.05.30</td>
+						<td>973</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1473')">
+								2025년 제1차 경량항공기 조종교육증명 안전교육(온라인) 안내
+									
+							</a>
+
+						</td>
+						<td>엄자현</td>
+						<td>2025.05.29</td>
+						<td>246</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1478')">
+								[공지] `25년 7월 초경량비행장치(무인멀티콥터) 조종교육교관과정 교육 일정 안내
+									
+							</a>
+
+						</td>
+						<td>김지민</td>
+						<td>2025.05.26</td>
+						<td>628</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1475')">
+								[공지] 초경량비행장치(무인멀티콥터) 실기평가과정 접수 일정 변경 안내(2차 접수 관련)
+									
+							</a>
+
+						</td>
+						<td>김세훈</td>
+						<td>2025.05.21</td>
+						<td>419</td>
+						<td>
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1474')">
+								[공지] &#39;25년 6월 초경량비행장치(무인멀티콥터) 실기평가과정 교육 일정 안내
+									
+							</a>
+
+						</td>
+						<td>김세훈</td>
+						<td>2025.05.21</td>
+						<td>830</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1463')">
+								[공지] &#39;25년 무인수직이착륙기 전문교관 전환을 위한 임시과정 일정 개설 안내
+									
+							</a>
+
+						</td>
+						<td>정우진</td>
+						<td>2025.04.29</td>
+						<td>2392</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1468')">
+								[공지] &#39;25년 5월 초경량비행장치(무인비행기) 실기평가과정 교육 일정 안내
+									
+							</a>
+
+						</td>
+						<td>김세훈</td>
+						<td>2025.04.28</td>
+						<td>843</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1466')">
+								[공지] [2025.4.21] 무인비행장치 조종자 증명 운영세칙 개정 알림
+									
+							</a>
+
+						</td>
+						<td>민현재</td>
+						<td>2025.04.24</td>
+						<td>814</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					<tr>
+						<td><span class="badge blue">알림</span></td>
+						<td class="uk-text-left">
+							<a href="#view" onclick="onView('1454')">
+								[공지] `25년 5월 초경량비행장치(무인멀티콥터) 조종교육교관과정 교육 일정 안내
+									
+							</a>
+
+						</td>
+						<td>김윤호</td>
+						<td>2025.04.23</td>
+						<td>1308</td>
+						<td>
+							
+								<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+							
+						</td>
+					</tr>
+				
+					
+                
+				<tr>
+					<td>201</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('1481')">
+							[공지] 6월 초경량비행장치 조종교육교관과정(지도조종자) 무인멀티콥터 정원 증설 안내
+							
+								&nbsp;<img src="/theme/pubs/images/common/ic_02.jpg" alt="신규" />
+							
+						</a>
+					</td>
+					<td>김지민</td>
+					<td>2025.06.09</td>
+					<td>54</td>
+					<td>
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>200</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('1469')">
+							[공지] 무인수직이착륙기 전문교관 전환을 위한 임시과정 자료 배포
+							
+						</a>
+					</td>
+					<td>정기훈</td>
+					<td>2025.06.04</td>
+					<td>1148</td>
+					<td>
+						
+							<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>199</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('1479')">
+							[공지] 「무인수직이착륙기 전문교관 전환을 위한 임시과정」 6월 이론교육 일정 공지
+							
+						</a>
+					</td>
+					<td>오수연</td>
+					<td>2025.06.02</td>
+					<td>201</td>
+					<td>
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>198</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('653')">
+							[공지] 초경량비행장치 전문교육기관 변경 신청서식(수정 25.5.29.)
+							
+						</a>
+					</td>
+					<td>송종현</td>
+					<td>2025.06.02</td>
+					<td>9783</td>
+					<td>
+						
+							<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>197</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('652')">
+							초경량비행장치(무인비행장치) 전문교육기관 지정 신청서식(수정 25.5.29)
+							
+						</a>
+					</td>
+					<td>송종현</td>
+					<td>2025.05.29</td>
+					<td>12578</td>
+					<td>
+						
+							<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>196</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('1480')">
+							[공지] &#39;25년 제2차 초경량비행장치(패러글라이더) 안전교육(집체) 안내
+							
+						</a>
+					</td>
+					<td>민현재</td>
+					<td>2025.05.27</td>
+					<td>82</td>
+					<td>
+						
+							<img src="/theme/pubs/images/common/board_ico_file.gif" alt="첨부파일" />
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>195</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('1477')">
+							[공지] 자격증 발급 비용 내 우체국 우편요금(등기수수료) 인상 사항 반영 안내
+							
+						</a>
+					</td>
+					<td>김세훈</td>
+					<td>2025.05.23</td>
+					<td>115</td>
+					<td>
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>194</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('1472')">
+							[공지] 김천드론자격센터 활주로 연습비행 개방 알림
+							
+						</a>
+					</td>
+					<td>장희원</td>
+					<td>2025.05.12</td>
+					<td>252</td>
+					<td>
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>193</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('1471')">
+							[공지-추가] &#39;25년 무인수직이착륙기 전문교관 전환을 위한 임시과정 일정 추가 개설 안내
+							
+						</a>
+					</td>
+					<td>정기훈</td>
+					<td>2025.05.12</td>
+					<td>383</td>
+					<td>
+						
+					</td>
+				</tr>
+				
+				<tr>
+					<td>192</td>
+					<td class="uk-text-left">
+						<a href="#view" onclick="onView('1470')">
+							[공지] 무인수직이착륙기 전문교관 전환을 위한 이론교육 입과자격 신청
+							
+						</a>
+					</td>
+					<td>정기훈</td>
+					<td>2025.04.30</td>
+					<td>495</td>
+					<td>
+						
+					</td>
+				</tr>
+				
+				</tbody>
+			</table> 
+			</div>
+             <div class="tbl_bottom">
+             	<div class="pagination">
+                     <a href=javascript:onListPage(1) class=btn_first title=처음페이지><span>첫페이지로 이동</span></a> <a href=javascript:onListPage(1) onclick=onListPage(1);return false; class=btn_prev title=이전페이지 ><span>이전 페이지로 이동</span></a> <a href=javascript:void(0) class=on>1</a> <a href=javascript:onListPage(2)>2</a> <a href=javascript:onListPage(3)>3</a> <a href=javascript:onListPage(4)>4</a> <a href=javascript:onListPage(5)>5</a> <a href=javascript:onListPage(6)>6</a> <a href=javascript:onListPage(7)>7</a> <a href=javascript:onListPage(8)>8</a> <a href=javascript:onListPage(9)>9</a> <a href=javascript:onListPage(10)>10</a> <a href=javascript:onListPage(11) class=btn_next title=다음페이지 ><span>다음 페이지로 이동</span></a> <a href=javascript:onListPage(21) class=btn_last title=마지막페이지 ><span>마지막페이지로 이동</span></a> 
+
+                 </div>
+             </div>
+<form name="form1" method="post" action="/pubs/notice/notice/ListAction.do" onsubmit="return false;" class="tile-search-form">
+	<input type="hidden" name="buSeqNo" value=""/>
+	<input type="hidden" name="currentPage" value="1"/>
+	<input type="hidden" name="PORT_T_NO" id="PORT_T_NO" value="03" />
+	<input type="hidden" name="PORT_L_NO" id="PORT_L_NO" value="01" />
+					<fieldset>
+						<div class="form-group">
+						 	<label for="searchKey" class="mr5">검색</label>
+							<select name="searchKey" id="searchKey" title="조건을 선택하세요" class="uk-select w-100">
+								<option value="0" >제목</option>
+								<option value="1" >내용 </option>
+								<option value="2" >제목+내용</option>
+							</select>
+							<span class="word-input">
+							<!-- <label for="searchWord" class="hidden"></label> -->
+							<input type="text" name="searchWord" id="searchWord" class="uk-input w-200" maxlength="100" value="" title="그룹번호" onkeypress="if(event.keyCode==13) {onSearch();}"/>
+			                <button onclick="onSearch(); return false;" class="uk-button uk-button-secondary">
+			                	검색
+			                </button>
+			        		</span> 
+						</div> 							
+					</fieldset>
+</form>   
+			</section>
+		</div> 
+	</article>
+
+	<footer>
+		
+
+
+		<h2 class="skip">하단영역</h2>
+		<div class="uk-container">
+
+			<div class="copyright">
+				<ul>
+					<!-- <li><a href="https://www.kotsa.or.kr/portal/contents.do?menuCode=07020100">개인정보처리방침</a></li>
+					<li><a href="https://www.kotsa.or.kr/portal/contents.do?menuCode=06040000" target="_blank" title="찾아오시는 길">찾아오시는 길</a></li> -->
+					<li><a href="https://main.kotsa.or.kr/portal/contents.do?menuCode=07020100" style="color:blue">개인정보처리방침</a></li>
+					<li><a href="https://main.kotsa.or.kr/portal/contents.do?menuCode=06040000" target="_blank" title="찾아오시는 길">찾아오시는 길</a></li>
+				</ul>
+				<a href="http://www.kotsa.or.kr" class="logo" target="blank"></a>
+				<p>39660 경상북도 김천시 혁신6로 17(율곡동) 한국교통안전공단<br>
+					Copyright© Transportation Safety. All rights reserved.
+				</p> 
+			</div> 
+		</div>	 
+		   
+	</footer> 	
+
+<script type="text/javascript" src="/html/script/js/jquery/jquery.fileupload.js"></script>
+<script src="/assets/js/main.nav.js"></script>
+<script src="/assets/js/banner.roll.js"></script>
+<script src="/assets/js/pushy.min.js"></script>
+<script src="/assets/js/uikit.min.js"></script>
+<script src="/assets/js/uikit-icons.min.js"></script>
+<script src="/assets/js/common.js"></script> 
+
+<script>
+	$(document).ready(function()
+	{
+		// 왼쪽영역 닫기/펼치기	  
+		$(".noti-close").click(function() {
+			if($(this).css("top") == "0px")
+			{
+				$(".urgent-noti").animate({top: "-200px"}, 500);
+			}
+		});	
+	 });    
+</script>
+
+<!-- ★ 메인메뉴 드롭다운 -->
+<script>
+	var isnavi=true;
+	var menuIndex=$(".new-main-nav > li > a");
+	$('.new-main-nav > li > a').on("focusin mouseover",function(i) {
+		$(".new-main-nav > li > div.submenu").hide();
+		var selectMenu=menuIndex.index($(this));
+		$(".new-main-nav > li > div.submenu").eq(selectMenu).stop().show();
+	});
+	$('#navigation').on("focusin mouseover",function() {
+		$(".submenu-bg").show();
+	}).on("mouseleave",function() {
+		$(".submenu-bg").stop().hide();
+		$(".new-main-nav > li > div.submenu").css("display","none");		
+	    isnavi=true;
+	});
+	$("a").focus(function(){
+		if($(".new-main-nav a").is(":focus")){
+		} else {
+			$(".submenu-bg").stop().hide();
+			$(".new-main-nav > li > div.submenu").css("display","none");	
+		}
+	});
+	
+
+	// 사이트맵 열림
+	$('.new-hamburger').click(function(){
+	  $('.sitemap').css("display","block");
+	  $('.sitemap.dialog .modal-close').click(function(){
+		  $('.sitemap').css("display","none");
+		});
+	});
+	
+</script>
+<script>
+function goLectureRoom2() {
+	frmH = document.formH; 
+	frmH.target = "onlms";
+	frmH.action = "/lms/SAFETY_LMS.do";
+// 	frmH.action = "http://localhost:8091/lms/SAFETY_LMS.do";
+	frmH.submit();
+}
+
+function goLectureMypage() {
+	frmH = document.formH1; 
+	frmH.target = "onlms";
+	frmH.action = "/lms/SAFETY_LMS.do";
+// 	frmH.action = "http://localhost:8091/lms/SAFETY_LMS.do";
+	frmH.submit();
+}
+
+function fn_sitemap(){
+	  $('.sitemap').css("display","block");
+	  $('.sitemap.dialog .modal-close').click(function(){
+		  $('.sitemap').css("display","none");
+		});
+}
+
+</script>
+<form name="formH" id="formH" method="post">
+	<input type="hidden" name="cryplid" id="cryplid" value="" />
+	<input type="hidden" name="P_MENU" id="P_MENU" value=""/>
+</form>		
+
+<form name="formH1" id="formH1" method="post">
+<input type="hidden" name="cryplid1" id="cryplid1" value="" />
+<input type="hidden" name="P_MENU1" id="P_MENU1" value="myPage"/>
+</form>	
+ 
+<form name="moveFrm" id="moveFrm" method="post" > 
+	<input type="hidden" name="menuNo"/>
+	<input type="hidden" name="lev"/>
+</form>	
+
+</body>
+</html>
+
+
+
