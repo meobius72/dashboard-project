@@ -5,305 +5,271 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>통합 대시보드</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; }
-        .container { display: flex; flex-wrap: wrap; justify-content: space-around; padding: 20px; }
-        .panel { background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 10px; padding: 20px; flex: 1; min-width: 300px; }
-        .panel h2 { color: #0056b3; margin-top: 0; }
-        .youtube-player { width: 100%; aspect-ratio: 16 / 9; }
-        .notice-list ul { list-style: none; padding: 0; }
-        .notice-list li { margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .notice-list li:last-child { border-bottom: none; }
-        .weather-info, .kp-index { text-align: center; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; overflow-x: hidden; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; max-width: 1920px; margin: 0 auto; box-sizing: border-box; }
+        .panel { background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 10px; padding: 20px; flex: 1; min-width: 300px; box-sizing: border-box; }
+        .panel.youtube {
+            flex-basis: calc(100% - 20px);
+            max-width: calc(100% - 20px);
+            overflow-y: auto;
+        }
+        .panel.weather {
+            flex-basis: calc(50% - 20px);
+            max-width: calc(50% - 20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .weather-info {
+            margin-top: 15px;
+            font-size: 1.2em;
+        }
+        .weather-info p {
+            margin: 5px 0;
+        }
+        .weather-error {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .notice-list li .date { font-size: 0.85em; color: #666; white-space: nowrap; margin-left: 10px; }
     </style>
 </head>
 <body>
-    <header style="background-color: #007bff; color: white; padding: 15px 20px; text-align: center;">
+    <!-- <header style="background-color: #007bff; color: white; padding: 15px 20px; text-align: center;">
         <h1>통합 대시보드</h1>
-    </header>
+    </header> -->
 
     <div class="container">
         <div class="panel youtube">
-            <h2>YouTube 동영상 플레이어</h2>
-            <div id="youtube-player"></div>
-            <div style="text-align: center; margin-top: 10px;">
+            <h2>교육원 홍보영상</h2>
+            <div class="youtube-player">
+                <iframe id="youtube-player" src="https://www.youtube.com/embed/vsSxqmwnYvA?mute=1&loop=1&autoplay=1&playlist=yCp0I4KuWJo"
+                        frameborder="0" allowfullscreen></iframe>
+            </div>
+            <div class="youtube-controls" style="text-align: center; margin-top: 10px;">
                 <button onclick="playPreviousVideo()">이전</button>
                 <button onclick="playNextVideo()">다음</button>
             </div>
-            <script>
-                var player;
-                var currentVideoId = '{{ current_video_id }}';
-                var refreshInterval = 300; // 기본 갱신 주기 (초)
-                var refreshTimer;
-
-                function onYouTubeIframeAPIReady() {
-                    player = new YT.Player('youtube-player', {
-                        height: '390',
-                        width: '640',
-                        videoId: currentVideoId,
-                        events: {
-                            'onReady': onPlayerReady,
-                            'onStateChange': onPlayerStateChange
-                        }
-                    });
-                }
-
-                function onPlayerReady(event) {
-                    // event.target.playVideo();
-                    startRefreshTimer(); // 플레이어 준비되면 갱신 타이머 시작
-                }
-
-                function onPlayerStateChange(event) {
-                    if (event.data === YT.PlayerState.ENDED) {
-                        playNextVideo();
-                    }
-                }
-
-                function playNextVideo() {
-                    fetch('/next_video')
-                        .then(response => response.json())
-                        .then(data => {
-                            player.loadVideoById(data.video_id);
-                        })
-                        .catch(error => console.error('다음 동영상 로드 오류:', error));
-                }
-
-                function playPreviousVideo() {
-                    fetch('/prev_video')
-                        .then(response => response.json())
-                        .then(data => {
-                            player.loadVideoById(data.video_id);
-                        })
-                        .catch(error => console.error('이전 동영상 로드 오류:', error));
-                }
-
-                // 주기적으로 데이터 갱신 함수
-                function updateDashboardData() {
-                    console.log('updateDashboardData 함수 호출됨'); // 디버깅 로그 추가
-                    // 날씨 정보 갱신
-                    fetch('/get_weather') // KMA API는 도시명을 args로 받지 않으므로 city=Seoul 제거
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data && !data.error) {
-                                // 현재 날씨 갱신
-                                document.getElementById('weather-city').innerText = "서울"; // 현재는 서울로 고정
-                                document.getElementById('current-temp').innerText = data.current_weather.temperature + '°C';
-                                document.getElementById('current-weather-desc').innerText = data.current_weather.sky_condition;
-                                document.getElementById('current-wind').innerText = data.current_weather.wind_direction_start + ' ~ ' + data.current_weather.wind_direction_end + ' (' + data.current_weather.wind_trend + ')';
-                                document.getElementById('current-rain').innerText = data.current_weather.precipitation_type;
-                                document.getElementById('current-rain-prob').innerText = data.current_weather.precipitation_probability + '%';
-
-                                // 주간 날씨 갱신
-                                var weeklyWeatherHtml = '';
-                                data.daily_forecast.forEach(function(daily) {
-                                    weeklyWeatherHtml += `<li>${daily.date} : ${daily.sky_condition}, ${daily.min_temperature}°C / ${daily.max_temperature}°C, 강수: ${daily.precipitation_type} (${daily.precipitation_probability}%)</li>`;
-                                });
-                                document.getElementById('weekly-weather').innerHTML = weeklyWeatherHtml;
-
-                                // 시간별 날씨 갱신
-                                var hourlyWeatherHtml = '';
-                                data.hourly_forecast.forEach(function(hourly) {
-                                    hourlyWeatherHtml += `<li>${hourly.time.substring(0, 2)}시: ${hourly.sky_condition}, ${hourly.temperature}°C, ${hourly.precipitation_type} (${hourly.precipitation_probability}%)</li>`;
-                                });
-                                document.getElementById('hourly-weather').innerHTML = hourlyWeatherHtml;
-
-                            } else if (data && data.error) {
-                                document.getElementById('weather-city').innerText = data.error;
-                                document.getElementById('current-temp').innerText = '';
-                                document.getElementById('current-weather-desc').innerText = '';
-                                document.getElementById('current-wind').innerText = '';
-                                document.getElementById('current-rain').innerText = '';
-                                document.getElementById('current-rain-prob').innerText = '';
-                                document.getElementById('weekly-weather').innerHTML = '<li>날씨 정보를 불러올 수 없습니다.</li>';
-                                document.getElementById('hourly-weather').innerHTML = '<li>시간별 날씨 정보를 불러올 수 없습니다.</li>';
-                            }
-                        })
-                        .catch(error => console.error('날씨 정보 갱신 오류:', error));
-
-                    // Kp 지수 갱신
-                    fetch('/get_kp_index')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data && !data.error) {
-                                document.getElementById('current-kp').innerText = data.current_kp;
-                                document.getElementById('kp-updated-time').innerText = data.updated_time;
-                            } else if (data && data.error) {
-                                document.getElementById('current-kp').innerText = data.error;
-                                document.getElementById('kp-updated-time').innerText = '';
-                            }
-                        })
-                        .catch(error => console.error('Kp 지수 갱신 오류:', error));
-
-                    // 공지사항 갱신 (선택 사항: 페이지 새로고침 또는 AJAX로 특정 부분만 갱신)
-                    // 현재는 페이지 로드 시에만 데이터를 가져오므로, 여기서는 구현하지 않겠습니다.
-                    // 필요한 경우, 공지사항 API를 추가하고 해당 부분을 업데이트하는 로직을 추가할 수 있습니다.
-                }
-
-                // 갱신 주기 설정 및 시작 함수
-                function startRefreshTimer() {
-                    // 기존 타이머가 있다면 클리어
-                    if (refreshTimer) {
-                        clearInterval(refreshTimer);
-                    }
-                    // 새로운 주기로 타이머 설정
-                    refreshTimer = setInterval(updateDashboardData, refreshInterval * 1000);
-                    console.log('대시보드 갱신 주기가 ' + refreshInterval + '초로 설정되었습니다.');
-                }
-
-                // 페이지 로드 시 현재 갱신 주기 가져와서 설정
-                document.addEventListener('DOMContentLoaded', function() {
-                    fetch('/get_refresh_interval')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data && data.interval) {
-                                refreshInterval = data.interval;
-                                document.getElementById('refresh-interval-input').value = refreshInterval;
-                                console.log('초기 갱신 주기: ' + refreshInterval + '초');
-                                // updateDashboardData(); // 이 위치에서 호출하지 않고 아래에서 무조건 호출하도록 변경
-                            }
-                        })
-                        .catch(error => console.error('갱신 주기 가져오기 오류:', error));
-
-                    updateDashboardData(); // DOMContentLoaded 시점에 무조건 호출
-
-                    // 갱신 주기 설정 버튼 이벤트 리스너
-                    document.getElementById('set-refresh-interval-btn').addEventListener('click', function() {
-                        var newInterval = document.getElementById('refresh-interval-input').value;
-                        fetch('/set_refresh_interval', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ interval: parseInt(newInterval) }),
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                refreshInterval = data.new_interval;
-                                startRefreshTimer(); // 새로운 주기로 타이머 재시작
-                                alert('갱신 주기가 성공적으로 설정되었습니다: ' + refreshInterval + '초');
-                            } else {
-                                alert('갱신 주기 설정 오류: ' + data.message);
-                            }
-                        })
-                        .catch(error => console.error('갱신 주기 설정 중 오류 발생:', error));
-                    });
-                });
-
-                // YouTube IFrame API 불러오기 (DOMContentLoaded 이후에 실행)
-                var tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                var firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-            </script>
         </div>
 
         <div class="panel weather">
-            <h2>날씨 정보</h2>
-            <div class="weather-info">
-                <p><strong>지역:</strong> <span id="weather-city">{% if weather_data and weather_data.current_weather %}{{ "서울" }}{% else %}불러오는 중...{% endif %}</span></p>
-                <p><strong>현재 온도:</strong> <span id="current-temp">{% if weather_data and weather_data.current_weather %}{{ weather_data.current_weather.temperature }}°C{% else %}불러오는 중...{% endif %}</span></p>
-                <p><strong>날씨:</strong> <span id="current-weather-desc">{% if weather_data and weather_data.current_weather %}{{ weather_data.current_weather.sky_condition }}{% else %}불러오는 중...{% endif %}</span></p>
-                <p><strong>바람:</strong> <span id="current-wind">{% if weather_data and weather_data.current_weather %}{{ weather_data.current_weather.wind_direction_start }} ~ {{ weather_data.current_weather.wind_direction_end }} ({{ weather_data.current_weather.wind_trend }}){% else %}불러오는 중...{% endif %}</span></p>
-                <p><strong>강수:</strong> <span id="current-rain">{% if weather_data and weather_data.current_weather %}{{ weather_data.current_weather.precipitation_type }}{% else %}없음{% endif %}</span></p>
-                <p><strong>강수확률:</strong> <span id="current-rain-prob">{% if weather_data and weather_data.current_weather %}{{ weather_data.current_weather.precipitation_probability }}%{% else %}불러오는 중...{% endif %}</span></p>
-
-                <h3>주간 날씨</h3>
-                <ul id="weekly-weather">
-                    {% if weather_data and weather_data.daily_forecast %}
-                        {% for daily in weather_data.daily_forecast %}
-                            <li>{{ daily.date }} : {{ daily.sky_condition }}, {{ daily.min_temperature }}°C / {{ daily.max_temperature }}°C, 강수: {{ daily.precipitation_type }} ({{ daily.precipitation_probability }}%)</li>
-                        {% endfor %}
-                    {% else %}
-                        <li>주간 날씨 정보를 불러오는 중...</li>
-                    {% endif %}
-                </ul>
-
-                <h3>당일 시간별 날씨 (07시-19시)</h3>
-                <ul id="hourly-weather">
-                    {% if weather_data and weather_data.hourly_forecast %}
-                        {% for hourly in weather_data.hourly_forecast %}
-                            <li>{{ hourly.time.substring(0, 2) }}시: {{ hourly.sky_condition }}, {{ hourly.temperature }}°C, {{ hourly.precipitation_type }} ({{ hourly.precipitation_probability }}%)</li>
-                        {% endfor %}
-                    {% else %}
-                        <li>시간별 날씨 정보를 불러오는 중...</li>
-                    {% endif %}
-                </ul>
+            <h2>하계동 날씨 정보</h2>
+            <div id="weather-data" class="weather-info">
+                <p>온도: <span id="current-temp">로딩 중...</span></p>
+                <p>강수량: <span id="current-rain">로딩 중...</span></p>
+                <p>습도: <span id="current-humi">로딩 중...</span></p>
             </div>
-            <!-- 날씨 API 연동 및 지역 선택 기능 추가 예정 -->
+            <div id="weather-error" class="weather-error"></div>
         </div>
 
-        <div class="panel kp-index">
-            <h2>지자기 지수 (Kp 지수)</h2>
-            <div class="kp-index">
-                <p><strong>현재 Kp 지수:</strong> <span id="current-kp">{% if kp_index_data and kp_index_data.current_kp %}{{ kp_index_data.current_kp }}{% else %}불러오는 중...{% endif %}</span></p>
-                <p><strong>업데이트 시간:</strong> <span id="kp-updated-time">{% if kp_index_data and kp_index_data.updated_time %}{{ kp_index_data.updated_time }}{% else %}불러오는 중...{% endif %}</span></p>
+        <div class="panel">
+            <h2>TS 국가자격시험 공지사항</h2>
+            <div id="kotsa-notices" class="notice-list">
+                <p>로딩 중...</p>
             </div>
-            <!-- Kp 지수 API 연동 추가 예정 -->
         </div>
 
-        <div class="panel notices">
-            <h2>공지사항</h2>
-            <h3>교통안전공단</h3>
-            <div class="notice-list" id="kotsa-notices">
-                <ul>
-                    {% for notice in kotsa_notices %}
-                    <li>
-                        제목: {{ notice['title'] }}
-                        {% if notice['link_id'] and notice['link_id'] != '#' %}
-                        <br>링크 ID: {{ notice['link_id'] }}
-                        {% endif %}
-                        <br>등록일: {{ notice['date'] }}
-                    </li>
-                    {% else %}
-                    <li>공지사항을 불러올 수 없습니다.</li>
-                    {% endfor %}
-                </ul>
+        <div class="panel">
+            <h2>항공교육훈련포털 공지사항 (알림)</h2>
+            <div id="kaa-alarm-notices" class="notice-list">
+                <p>로딩 중...</p>
             </div>
+        </div>
 
-            <h3>항공교육훈련포털</h3>
-            <h4>알림 공지사항</h4>
-            <div class="notice-list" id="kaa-alarm-notices">
-                <ul>
-                    {% for notice in kaa_alarm_notices %}
-                    <li>
-                        제목: {{ notice['title'] }}
-                        {% if notice['link_id'] and notice['link_id'] != '#' %}
-                        <br>링크 ID: {{ notice['link_id'] }}
-                        {% endif %}
-                        <br>등록일: {{ notice['date'] }}
-                    </li>
-                    {% else %}
-                    <li>알림 공지사항을 불러올 수 없습니다.</li>
-                    {% endfor %}
-                </ul>
+        <div class="panel">
+            <h2>항공교육훈련포털 공지사항 (공지)</h2>
+            <div id="kaa-numbered-notices" class="notice-list">
+                <p>로딩 중...</p>
             </div>
-            <h4>일반 공지사항</h4>
-            <div class="notice-list" id="kaa-numbered-notices">
-                <ul>
-                    {% for notice in kaa_numbered_notices %}
-                    <li>
-                        제목: {{ notice['title'] }}
-                        {% if notice['link_id'] and notice['link_id'] != '#' %}
-                        <br>링크 ID: {{ notice['link_id'] }}
-                        {% endif %}
-                        <br>등록일: {{ notice['date'] }}
-                    </li>
-                    {% else %}
-                    <li>일반 공지사항을 불러올 수 없습니다.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <!-- 스크래핑 프로그램 연동 예정 -->
+        </div>
+
+        <div class="controls panel">
+            <h2>화면 갱신 주기 설정</h2>
+            <input type="number" id="refresh-interval-input" value="300" min="60" step="60">
+            <button id="set-refresh-interval-btn">설정</button>
         </div>
     </div>
 
     <footer style="background-color: #333; color: white; text-align: center; padding: 10px 0; position: relative; bottom: 0; width: 100%;">
         <p>&copy; 2023 통합 대시보드. 모든 권리 보유.</p>
-        <div style="margin-top: 10px;">
-            <label for="refresh-interval-input">화면 갱신 주기 (초):</label>
-            <input type="number" id="refresh-interval-input" value="300" min="10">
-            <button id="set-refresh-interval-btn">설정</button>
-        </div>
     </footer>
+
+    <script>
+        var player;
+        var currentVideoId = '{{ current_video_id }}';
+        var refreshInterval = 300;
+        var refreshTimer;
+
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '100%',
+                width: '100%',
+                videoId: currentVideoId,
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 1,
+                    'loop': 1,
+                    'playlist': currentVideoId,
+                    'mute': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+            startRefreshTimer();
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                // playNextVideo();
+            }
+        }
+
+        function playNextVideo() {
+            fetch('/next_video')
+                .then(response => response.json())
+                .then(data => {
+                    player.loadVideoById(data.video_id);
+                    currentVideoId = data.video_id;
+                })
+                .catch(error => console.error('다음 동영상 로드 오류:', error));
+        }
+
+        function playPreviousVideo() {
+            fetch('/prev_video')
+                .then(response => response.json())
+                .then(data => {
+                    player.loadVideoById(data.video_id);
+                    currentVideoId = data.video_id;
+                })
+                .catch(error => console.error('이전 동영상 로드 오류:', error));
+        }
+
+        function fetchWeatherData() {
+            console.log('fetchWeatherData 함수 호출됨');
+            fetch('/get_weather')
+                .then(response => response.json())
+                .then(data => {
+                    const tempElement = document.getElementById('current-temp');
+                    const rainElement = document.getElementById('current-rain');
+                    const humiElement = document.getElementById('current-humi');
+                    const errorElement = document.getElementById('weather-error');
+
+                    if (data.error) {
+                        tempElement.textContent = '오류';
+                        rainElement.textContent = '오류';
+                        humiElement.textContent = '오류';
+                        errorElement.textContent = `날씨 정보 오류: ${data.error}`;
+                        console.error('날씨 정보 API 오류:', data.error);
+                    } else {
+                        tempElement.textContent = data.temperature ? `${data.temperature}°C` : 'N/A';
+                        rainElement.textContent = data.rainfall ? `${data.rainfall}mm` : 'N/A';
+                        humiElement.textContent = data.humidity ? `${data.humidity}%` : 'N/A';
+                        errorElement.textContent = '';
+                        console.log('날씨 정보 성공적으로 로드됨:', data);
+                    }
+                })
+                .catch(error => {
+                    const errorElement = document.getElementById('weather-error');
+                    errorElement.textContent = `날씨 정보 로드 중 오류 발생: ${error}`;
+                    console.error('날씨 정보 fetch 오류:', error);
+                });
+        }
+
+        function updateDashboardData() {
+            console.log('updateDashboardData 함수 호출됨');
+            // 공지사항 갱신
+            fetch('/get_notices')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && !data.error) {
+                        var kotsaNoticesHtml = '';
+                        data.kotsa_notices.forEach(function(notice) {
+                            kotsaNoticesHtml += `<li><a href="https://lic.kotsa.or.kr/tsportal/board/view.do?manage_idx=10&menu_idx=9&board_idx=${notice.link_id}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
+                        });
+                        document.getElementById('kotsa-notices').innerHTML = `<ul>${kotsaNoticesHtml}</ul>`;
+
+                        var kaaAlarmNoticesHtml = '';
+                        data.kaa_notices.alarm_notices.forEach(function(notice) {
+                            kaaAlarmNoticesHtml += `<li><a href="https://www.kaa.atims.kr/pubs/notice/notice/ViewAction.do?noti_idx=${notice.link_id}" target="_blank">[알림] ${notice.title}</a> <span class="date">${notice.date}</span></li>`;
+                        });
+                        document.getElementById('kaa-alarm-notices').innerHTML = `<ul>${kaaAlarmNoticesHtml}</ul>`;
+
+                        var kaaNumberedNoticesHtml = '';
+                        data.kaa_notices.numbered_notices.forEach(function(notice) {
+                            kaaNumberedNoticesHtml += `<li><a href="https://www.kaa.atims.kr/pubs/notice/notice/ViewAction.do?noti_idx=${notice.link_id}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
+                        });
+                        document.getElementById('kaa-numbered-notices').innerHTML = `<ul>${kaaNumberedNoticesHtml}</ul>`;
+
+                    } else if (data && data.error) {
+                        document.getElementById('kotsa-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
+                        document.getElementById('kaa-alarm-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
+                        document.getElementById('kaa-numbered-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
+                    }
+                })
+                .catch(error => console.error('공지사항 갱신 오류:', error));
+
+            fetchWeatherData();
+        }
+
+        function startRefreshTimer() {
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+            }
+            refreshTimer = setInterval(updateDashboardData, refreshInterval * 1000);
+            console.log('대시보드 갱신 주기가 ' + refreshInterval + '초로 설정되었습니다.');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/get_refresh_interval')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.interval) {
+                        refreshInterval = data.interval;
+                        document.getElementById('refresh-interval-input').value = refreshInterval;
+                        console.log('초기 갱신 주기: ' + refreshInterval + '초');
+                    }
+                })
+                .catch(error => console.error('갱신 주기 가져오기 오류:', error));
+
+            updateDashboardData();
+
+            document.getElementById('set-refresh-interval-btn').addEventListener('click', function() {
+                var newInterval = document.getElementById('refresh-interval-input').value;
+                fetch('/set_refresh_interval', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ interval: parseInt(newInterval) }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        refreshInterval = data.new_interval;
+                        startRefreshTimer();
+                        alert('갱신 주기가 성공적으로 설정되었습니다: ' + refreshInterval + '초');
+                    } else {
+                        alert('갱신 주기 설정 오류: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('갱신 주기 설정 중 오류 발생:', error));
+            });
+        });
+    </script>
 </body>
 </html> 

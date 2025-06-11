@@ -47,7 +47,7 @@ def scrape_kotsa_notices(url="https://lic.kotsa.or.kr/tsportal/board/index.do?ma
             except (AttributeError, IndexError) as e:
                 # print(f"행 파싱 오류: {e} - {row}") # 디버깅을 위해 오류 행 출력
                 continue # 예상 구조와 다른 행은 건너뜀
-    return notices[:5] # 최신 5개만 반환
+    return notices[:3] # 최신 3개만 반환
 
 def scrape_kaa_notices(url="https://www.kaa.atims.kr/pubs/notice/notice/ListAction.do"):
     alarm_notices = []
@@ -83,8 +83,11 @@ def scrape_kaa_notices(url="https://www.kaa.atims.kr/pubs/notice/notice/ListActi
                     link_id = link_href[link_id_start:link_id_end] if link_id_end != -1 else link_href[link_id_start:]
 
                 date = row.find_all('td')[3].get_text(strip=True)
+                # 조회수는 일반적으로 날짜 다음 td에 위치하거나 같은 td에 있을 수 있습니다.
+                # 현재 웹사이트 구조를 명확히 알 수 없어 일반적인 4번째 td를 시도합니다.
+                view_count = row.find_all('td')[4].get_text(strip=True) if len(row.find_all('td')) > 4 else 'N/A'
                 
-                notice_data = {"title": title, "link_id": link_id, "date": date}
+                notice_data = {"title": title, "link_id": link_id, "date": date, "view_count": view_count}
 
                 if first_td_text == "알림":
                     alarm_notices.append(notice_data)
@@ -95,11 +98,11 @@ def scrape_kaa_notices(url="https://www.kaa.atims.kr/pubs/notice/notice/ListActi
                 # print(f"행 파싱 오류: {e} - {row}")
                 continue
     
-    # 최신 3개 알림 공지사항과 최신 5개 번호 공지사항을 반환합니다.
-    return {"alarm_notices": alarm_notices[:3], "numbered_notices": numbered_notices[:5]}
+    # 최신 3개 알림 공지사항과 최신 3개 번호 공지사항을 반환합니다.
+    return {"alarm_notices": alarm_notices[:3], "numbered_notices": numbered_notices[:3]}
 
 if __name__ == "__main__":
-    print("교통안전공단 최신 공지사항 (최근 5개):")
+    print("교통안전공단 최신 공지사항 (최근 3개):")
     kotsa_notices = scrape_kotsa_notices()
     if isinstance(kotsa_notices, list) and kotsa_notices and "error" in kotsa_notices[0]:
         print(kotsa_notices[0]["error"])
@@ -120,11 +123,13 @@ if __name__ == "__main__":
             print(f"• 제목: {notice['title']}")
             print(f"  링크 ID: {notice['link_id']}")
             print(f"  등록일: {notice['date']}")
+            print(f"  조회수: {notice['view_count']}")
             print()
         
-        print("  일반 공지사항 (최신 5개):")
+        print("  일반 공지사항 (최신 3개):")
         for notice in kaa_notices_categorized["numbered_notices"]:
             print(f"• 제목: {notice['title']}")
             print(f"  링크 ID: {notice['link_id']}")
             print(f"  등록일: {notice['date']}")
+            print(f"  조회수: {notice['view_count']}")
             print() 
