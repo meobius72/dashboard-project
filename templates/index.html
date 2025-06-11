@@ -37,6 +37,7 @@
         }
         .notice-list li .date { font-size: 0.85em; color: #666; white-space: nowrap; margin-left: 10px; }
         /* 해상도 표시를 위한 CSS */
+        /*
         #resolution-display {
             position: fixed;
             top: 10px;
@@ -48,10 +49,11 @@
             font-size: 0.9em;
             z-index: 1000;
         }
+        */
     </style>
 </head>
 <body>
-    <div id="resolution-display"></div>
+    <!-- <div id="resolution-display"></div> -->
     <!-- <header style="background-color: #007bff; color: white; padding: 15px 20px; text-align: center;">
         <h1>통합 대시보드</h1>
     </header> -->
@@ -249,12 +251,14 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             // 해상도 표시
+            /*
             const resolutionDisplay = document.getElementById('resolution-display');
             if (resolutionDisplay) {
                 const screenWidth = window.screen.width;
                 const screenHeight = window.screen.height;
                 resolutionDisplay.textContent = `화면 해상도: ${screenWidth}x${screenHeight}`;
             }
+            */
 
             fetch('/get_refresh_interval')
                 .then(response => response.json())
