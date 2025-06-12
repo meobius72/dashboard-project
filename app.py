@@ -5,8 +5,15 @@ from scrape_notices import scrape_kotsa_notices, scrape_kaa_notices
 from datetime import datetime, timedelta, timezone
 import json
 from collections import Counter
+import threading
+import time
+import sqlite3
+from flask_cors import CORS
+import io
+import pandas as pd
 
 app = Flask(__name__)
+CORS(app) # 모든 경로에 대해 CORS 허용
 
 print("Hello, from Flask app startup!") # 테스트를 위한 출력
 
@@ -20,6 +27,159 @@ current_youtube_index = 0
 
 # 화면 갱신 주기 설정 (초 단위, 기본값 5분 = 300초)
 REFRESH_INTERVAL = 300
+
+# Database configuration
+DATABASE_FILE = 'weather_forecasts.db'
+
+# weather1.py에서 가져온 인증키 및 지역 코드
+AUTH_KEY = "6pbnk4lATQe55OJQG0Hzw"
+REGION_CODE_NAMYANGJU = "11B20502"
+
+def init_db():
+    with app.app_context():
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        # Create table for short-term forecasts
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS short_term_forecasts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                base_date TEXT NOT NULL,
+                base_time TEXT NOT NULL,
+                forecast_date TEXT NOT NULL,
+                forecast_time TEXT NOT NULL,
+                nx INTEGER NOT NULL,
+                ny INTEGER NOT NULL,
+                category TEXT NOT NULL,
+                fcst_value TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(base_date, base_time, forecast_date, forecast_time, nx, ny, category)
+            )
+        ''')
+        conn.commit()
+        conn.close()
+        print("Database initialized.")
+
+def insert_forecast_data(data):
+    with app.app_context():
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        try:
+            if data and data.get("forecasts"):
+                base_reference_time = data.get("base_reference_time")
+                base_date = base_reference_time.split(' ')[0].replace('-', '')
+                base_time = base_reference_time.split(' ')[1].replace(':', '')
+                nx = data["location"]["grid_x"]
+                ny = data["location"]["grid_y"]
+
+                for forecast_item in data["forecasts"]:
+                    forecast_date_str = forecast_item["date"]
+                    forecast_time_str = forecast_item["time"]
+                    for category, fcst_value in forecast_item["weather"].items():
+                        cursor.execute('''
+                            INSERT OR REPLACE INTO short_term_forecasts
+                            (base_date, base_time, forecast_date, forecast_time, nx, ny, category, fcst_value)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        ''',
+                        (base_date, base_time, forecast_date_str, forecast_time_str, nx, ny, category, str(fcst_value)))
+                conn.commit()
+                print("Forecast data inserted/updated into DB.")
+            else:
+                print("No forecast data to insert.")
+        except sqlite3.Error as e:
+            print(f"Database error during insertion: {e}")
+        finally:
+            conn.close()
+
+def get_latest_forecasts_from_db(nx, ny):
+    with app.app_context():
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        # Get the latest base_date and base_time for the given nx, ny
+        cursor.execute('''
+            SELECT base_date, base_time FROM short_term_forecasts
+            WHERE nx = ? AND ny = ?
+            ORDER BY base_date DESC, base_time DESC
+            LIMIT 1
+        ''', (nx, ny))
+        latest_base = cursor.fetchone()
+        
+        if not latest_base:
+            conn.close()
+            return None
+            
+        base_date, base_time = latest_base
+
+        # Fetch all forecast items for this latest base_date and base_time, and nx, ny
+        cursor.execute('''
+            SELECT forecast_date, forecast_time, category, fcst_value
+            FROM short_term_forecasts
+            WHERE base_date = ? AND base_time = ? AND nx = ? AND ny = ?
+            ORDER BY forecast_date ASC, forecast_time ASC
+        ''', (base_date, base_time, nx, ny))
+        rows = cursor.fetchall()
+        conn.close()
+
+        if not rows:
+            return None
+
+        # Reconstruct the data into the desired format
+        location_info = {"latitude": None, "longitude": None, "grid_x": nx, "grid_y": ny}
+        base_reference_time = f"{base_date[:4]}-{base_date[4:6]}-{base_date[6:]} {base_time[:2]}:{base_time[2:]}"
+        
+        forecasts_by_time = {}
+        for row in rows:
+            fcst_date, fcst_time, category, fcst_value = row
+            forecast_datetime_str = f"{fcst_date}{fcst_time}"
+            if forecast_datetime_str not in forecasts_by_time:
+                forecasts_by_time[forecast_datetime_str] = {
+                    "date": fcst_date,
+                    "time": fcst_time,
+                    "weather": {}
+                }
+            forecasts_by_time[forecast_datetime_str]["weather"][category] = fcst_value
+
+        # PTY (강수형태) 매핑 (from KMAWeatherAPI)
+        pty_map = {
+            "0": "없음", "1": "비", "2": "비/눈", "3": "눈",
+            "4": "소나기", "5": "빗방울", "6": "빗방울/눈날림", "7": "눈날림"
+        }
+
+        formatted_forecasts = []
+        for dt_str in sorted(forecasts_by_time.keys()):
+            forecast_item = forecasts_by_time[dt_str]
+            weather_data = forecast_item["weather"]
+
+            precipitation_str = weather_data.get("RN6", "0.0")
+            if precipitation_str == "강수없음":
+                precipitation_mm = 0.0
+            else:
+                try:
+                    precipitation_mm = float(precipitation_str)
+                except ValueError:
+                    precipitation_mm = 0.0
+
+            formatted_forecast = {
+                "location": location_info,
+                "forecast_time": f"{forecast_item['date'][:4]}-{forecast_item['date'][4:6]}-{forecast_item['date'][6:]} {forecast_item['time'][:2]}:{forecast_item['time'][2:]}",
+                "weather": {
+                    "temperature_celsius": float(weather_data.get("TMP", 0.0)),
+                    "humidity_percent": float(weather_data.get("REH", 0.0)),
+                    "precipitation_mm": precipitation_mm,
+                    "precipitation_type": pty_map.get(weather_data.get("PTY", "0"), "정보 없음"),
+                    "wind_direction_deg": float(weather_data.get("VEC", 0.0)),
+                    "wind_speed_ms": float(weather_data.get("WSD", 0.0)),
+                    "sky_condition": weather_data.get("SKY", "정보 없음"),
+                    "precipitation_probability": float(weather_data.get("POP", 0.0))
+                }
+            }
+            formatted_forecasts.append(formatted_forecast)
+
+        return {
+            "location": location_info,
+            "base_reference_time": base_reference_time,
+            "forecasts": formatted_forecasts,
+            "message": "날씨 정보 조회 성공"
+        }
 
 # KMA API를 위한 위경도-격자 좌표 변환 함수
 def convert_gps_to_grid(latitude, longitude):
@@ -85,13 +245,14 @@ def convert_gps_to_grid(latitude, longitude):
 
     return int(x), int(y)
 
-# KMAWeatherAPI 클래스 (초단기실황조회 API 클라이언트)
+# KMAWeatherAPI 클래스 (단기예보 API 클라이언트)
 class KMAWeatherAPI:
     def __init__(self, service_key):
         if not service_key or service_key == "YOUR_KMA_SERVICE_KEY":
             raise ValueError("유효한 서비스 키를 입력해야 합니다. 환경 변수 등을 통해 안전하게 관리하세요.")
         self.service_key = service_key
-        self.endpoint = "https://apihub.kma.go.kr/api/typ02/openApi/VilageFcstInfoService_2.0/getUltraSrtNcst"
+        # 단기예보 API 엔드포인트
+        self.endpoint = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst"
 
     def _get_grid_coords(self, latitude, longitude):
         return convert_gps_to_grid(latitude, longitude)
@@ -99,27 +260,29 @@ class KMAWeatherAPI:
     def _get_base_date_time(self):
         now = datetime.now(timezone.utc) + timedelta(hours=9) # KST (UTC+9)
 
-        target_dt = now
+        # 단기예보 (getVilageFcst)는 3시간 간격으로 발표 (02, 05, 08, 11, 14, 17, 20, 23시)
+        # 각 발표 시각 10분 이후부터 조회 가능 (e.g., 02시 발표 자료는 02:10부터)
+        base_times = ["0200", "0500", "0800", "1100", "1400", "1700", "2000", "2300"]
+        base_date = now.strftime("%Y%m%d")
+        base_time = ""
 
-        # 초단기실황조회 (getUltraSrtNcst)는 매 시간 10분 이후에 호출 권장
-        # base_time은 HH00 형식 (정시 단위)
-        if now.minute < 10:
-            target_dt -= timedelta(hours=1)
-
-        base_hour_str = f"{target_dt.hour:02d}"
-        base_time_str = base_hour_str + "00" # HH00 형식으로 고정
-
-        # 24시인 경우 00시로 조정 (API가 00시를 사용)
-        if base_time_str == '2400':
-            base_time_str = '0000'
-            # 날짜도 다음 날로 변경 (이전 시각이 23:xx이고 다음날 00:xx로 조정될 경우)
-            target_dt += timedelta(days=1) 
-
-        base_date_str = target_dt.strftime("%Y%m%d")
+        # 가장 최근의 발표 시간을 찾음 (발표 시간 + 10분 이후)
+        for bt_str in sorted(base_times, reverse=True):
+            bt_hour = int(bt_str[:2])
+            
+            # 현재 시간 (now)이 발표 시간 (bt_hour:00) + 10분 보다 같거나 이후인 경우
+            if now.hour > bt_hour or (now.hour == bt_hour and now.minute >= 10):
+                base_time = bt_str
+                break
         
-        return base_date_str, base_time_str
+        # 만약 현재 시간이 당일 02시 10분 이전이라면, 전날의 마지막 발표 시간(2300)을 사용
+        if not base_time:
+            base_date = (now - timedelta(days=1)).strftime("%Y%m%d")
+            base_time = "2300"
 
-    def get_realtime_weather(self, latitude, longitude):
+        return base_date, base_time
+
+    def get_forecast_weather(self, latitude, longitude): # 이름 변경
         nx, ny = self._get_grid_coords(latitude, longitude)
         base_date, base_time = self._get_base_date_time()
 
@@ -138,6 +301,9 @@ class KMAWeatherAPI:
             response = requests.get(self.endpoint, params=params, timeout=10)
             response.raise_for_status()
             
+            print(f"Raw API response status: {response.status_code}")
+            print(f"Raw API response text: {response.text}") # 원시 응답 텍스트 출력 추가
+            
             data = response.json()
             print(json.dumps(data, indent=4, ensure_ascii=False)) # API 원시 응답 로깅
 
@@ -145,57 +311,83 @@ class KMAWeatherAPI:
             result_code = header.get("resultCode")
             result_msg = header.get("resultMsg")
 
-            if result_code!= "00":
-                raise Exception(f"API Error {result_code}: {result_msg}")
+            if result_code != "00":
+                raise Exception(f"API Error {result_code}: {result_msg}. Raw response: {response.text}") # 원시 응답 포함
 
-            items = data.get("response", {}).get("body", {}).get("items", {}).get("item",)
+            items = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
             if not items:
                 return {
                     "location": {"latitude": latitude, "longitude": longitude, "grid_x": nx, "grid_y": ny},
-                    "reference_time": f"{base_date[:4]}-{base_date[4:6]}-{base_date[6:]} {base_time[:2]}:{base_time[2:]}",
-                    "weather": {},
+                    "base_reference_time": f"{base_date[:4]}-{base_date[4:6]}-{base_date[6:]} {base_time[:2]}:{base_time[2:]}",
+                    "forecasts": [], # 예보 목록
                     "message": "해당 조건의 날씨 데이터가 없습니다."
                 }
 
-            weather_info = {}
+            # 단기예보는 여러 예보 시간과 항목을 포함하므로, 이를 구조화하여 저장
+            forecasts_by_time = {}
             for item in items:
                 category = item.get("category")
-                obsr_value = item.get("obsrValue")
-                if category and obsr_value is not None:
-                    weather_info[category] = obsr_value
+                fcst_value = item.get("fcstValue")
+                fcst_date = item.get("fcstDate")
+                fcst_time = item.get("fcstTime")
+
+                if category and fcst_value is not None and fcst_date and fcst_time:
+                    forecast_datetime_str = f"{fcst_date}{fcst_time}"
+                    if forecast_datetime_str not in forecasts_by_time:
+                        forecasts_by_time[forecast_datetime_str] = {
+                            "date": fcst_date,
+                            "time": fcst_time,
+                            "weather": {}
+                        }
+                    forecasts_by_time[forecast_datetime_str]["weather"][category] = fcst_value
             
+            # 정렬하여 리스트로 변환
+            sorted_forecasts = []
+            for dt_str in sorted(forecasts_by_time.keys()):
+                sorted_forecasts.append(forecasts_by_time[dt_str])
+
+            # PTY (강수형태) 매핑
             pty_map = {
                 "0": "없음", "1": "비", "2": "비/눈", "3": "눈",
                 "4": "소나기", "5": "빗방울", "6": "빗방울/눈날림", "7": "눈날림"
             }
-            
-            precipitation_str = weather_info.get("RN1", "0.0")
-            if precipitation_str == "강수없음":
-                precipitation_mm = 0.0
-            else:
-                try:
-                    precipitation_mm = float(precipitation_str)
-                except ValueError:
-                    precipitation_mm = 0.0
 
-            formatted_weather = {
-                "location": {
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "grid_x": nx,
-                    "grid_y": ny
-                },
-                "reference_time": f"{base_date[:4]}-{base_date[4:6]}-{base_date[6:]} {base_time[:2]}:{base_time[2:]}",
-                "weather": {
-                    "temperature_celsius": float(weather_info.get("T1H", 0.0)),
-                    "humidity_percent": float(weather_info.get("REH", 0.0)),
-                    "precipitation_mm": precipitation_mm,
-                    "precipitation_type": pty_map.get(weather_info.get("PTY", "0"), "정보 없음"),
-                    "wind_direction_deg": float(weather_info.get("VEC", 0.0)),
-                    "wind_speed_ms": float(weather_info.get("WSD", 0.0))
+            # 각 예보 항목을 최종 형식으로 가공
+            formatted_forecasts = []
+            for forecast_item in sorted_forecasts:
+                weather_data = forecast_item["weather"]
+                
+                precipitation_str = weather_data.get("RN6", "0.0") # 6시간 강수량
+                if precipitation_str == "강수없음": # API에서 "강수없음"으로 올 경우 처리
+                    precipitation_mm = 0.0
+                else:
+                    try:
+                        precipitation_mm = float(precipitation_str)
+                    except ValueError:
+                        precipitation_mm = 0.0
+
+                formatted_forecast = {
+                    "location": {"latitude": latitude, "longitude": longitude, "grid_x": nx, "grid_y": ny},
+                    "forecast_time": f"{forecast_item['date'][:4]}-{forecast_item['date'][4:6]}-{forecast_item['date'][6:]} {forecast_item['time'][:2]}:{forecast_item['time'][2:]}",
+                    "weather": {
+                        "temperature_celsius": float(weather_data.get("TMP", 0.0)), # 기온은 TMP
+                        "humidity_percent": float(weather_data.get("REH", 0.0)), # 습도 REH
+                        "precipitation_mm": precipitation_mm,
+                        "precipitation_type": pty_map.get(weather_data.get("PTY", "0"), "정보 없음"), # 강수형태 PTY
+                        "wind_direction_deg": float(weather_data.get("VEC", 0.0)), # 풍향 VEC
+                        "wind_speed_ms": float(weather_data.get("WSD", 0.0)), # 풍속 WSD
+                        "sky_condition": weather_data.get("SKY", "정보 없음"), # 하늘상태 SKY
+                        "precipitation_probability": float(weather_data.get("POP", 0.0)) # 강수확률 POP
+                    }
                 }
+                formatted_forecasts.append(formatted_forecast)
+
+            return {
+                "location": {"latitude": latitude, "longitude": longitude, "grid_x": nx, "grid_y": ny},
+                "base_reference_time": f"{base_date[:4]}-{base_date[4:6]}-{base_date[6:]} {base_time[:2]}:{base_time[2:]}",
+                "forecasts": formatted_forecasts,
+                "message": "날씨 정보 조회 성공"
             }
-            return formatted_weather
 
         except requests.exceptions.HTTPError as e:
             raise Exception(f"HTTP Error: {e.response.status_code} {e.response.reason} - {e.response.text}")
@@ -210,37 +402,57 @@ class KMAWeatherAPI:
 
 # KMA API 설정
 KMA_API_KEY = "6pbnk4lATQeW55OJQG0Hzw" # 사용자 제공 API 키
-kma_api_client = KMAWeatherAPI(service_key=KMA_API_KEY)
+kma_api = KMAWeatherAPI(service_key=KMA_API_KEY)
 # 하계동 위경도 (웹 검색을 통해 찾은 값)
 HAGYE_DONG_LATITUDE = 37.6365682
 HAGYE_DONG_LONGITUDE = 127.0679542
 
+# Global variable to store the latest forecast data (no longer strictly needed for persistent storage)
+# but can be used for initial load or fallback
+latest_forecast_data = {}
+
+# Function to update weather data periodically
+def update_weather_data():
+    global latest_forecast_data
+    print("Fetching latest weather data...")
+    try:
+        latitude = 37.5665  # Example: Seoul coordinates
+        longitude = 126.9780 # Example: Seoul coordinates
+        fetched_data = kma_api.get_forecast_weather(latitude, longitude)
+        if fetched_data:
+            latest_forecast_data = fetched_data # Still keep this for immediate access
+            insert_forecast_data(fetched_data) # Insert into database
+            print("Weather data updated and saved to DB successfully.")
+        else:
+            print("Failed to fetch weather data or no data returned.")
+    except Exception as e:
+        # 오류 발생 시 더 자세한 정보를 출력
+        print(f"Error fetching weather data: {e}")
+        if hasattr(e, 'response') and hasattr(e.response, 'text'):
+            print(f"API response text on error: {e.response.text}")
+    
+    threading.Timer(10800, update_weather_data).start()
+
+# Start the initial weather data fetch and schedule subsequent updates
+with app.app_context():
+    init_db() # Initialize database on app startup
+    update_weather_data()
+
 @app.route('/get_weather')
 def get_weather():
-    try:
-        # KMAWeatherAPI 클래스를 사용하여 날씨 정보 가져오기
-        weather_data = kma_api_client.get_realtime_weather(HAGYE_DONG_LATITUDE, HAGYE_DONG_LONGITUDE)
-        
-        # 클라이언트에 보낼 형식으로 데이터 가공 (필요하다면)
-        # 예시: { "temperature": 25.0, "rainfall": 0.0, "humidity": 70.0, "error": null }
-        # KMAWeatherAPI.get_realtime_weather는 이미 표준화된 JSON 형식 반환
-        
-        # API 오류가 message 필드에 있을 수 있으므로 확인
-        if "message" in weather_data:
-            return jsonify({"error": weather_data["message"]}), 500
-        
-        # 기존 형식에 맞춰 반환 (temperature, rainfall, humidity)
-        return jsonify({
-            "temperature": weather_data["weather"].get("temperature_celsius"),
-            "rainfall": weather_data["weather"].get("precipitation_mm"),
-            "humidity": weather_data["weather"].get("humidity_percent"),
-            "error": None # 성공 시 에러 없음
-        })
-
-    except ValueError as ve:
-        return jsonify({"error": f"설정 오류: {str(ve)}"}), 500
-    except Exception as e:
-        return jsonify({"error": f"날씨 정보 조회 오류: {str(e)}"}), 500
+    # Fetch data from the database instead of global variable
+    latitude = 37.5665 # Example: Seoul coordinates
+    longitude = 126.9780 # Example: Seoul coordinates
+    nx, ny = convert_gps_to_grid(latitude, longitude)
+    
+    forecast_from_db = get_latest_forecasts_from_db(nx, ny)
+    
+    if forecast_from_db:
+        return jsonify(forecast_from_db)
+    elif latest_forecast_data: # Fallback to in-memory data if DB is empty for some reason
+        return jsonify(latest_forecast_data)
+    else:
+        return jsonify({"message": "Weather data not available yet.", "forecasts": []}), 503
 
 @app.route('/')
 def index():
@@ -282,6 +494,65 @@ def set_refresh_interval():
 @app.route('/get_refresh_interval')
 def get_refresh_interval():
     return jsonify({"interval": REFRESH_INTERVAL})
+
+def get_regional_forecast_data(auth_key: str, region_code: str):
+    """
+    '지역별 단기예보' API를 호출하여 날씨 정보를 가져옵니다.
+    """
+    api_url = "https://apihub.kma.go.kr/api/typ01/url/fct_shrt_reg.php"
+    
+    params = {
+        'tmfc': '0',
+        'reg': region_code,
+        'disp': '1',
+        'authKey': auth_key
+    }
+
+    try:
+        response = requests.get(api_url, params=params, timeout=10)
+        response.raise_for_status()
+
+        cleaned_data = '\n'.join(
+            line for line in response.text.splitlines()
+            if line.strip() and not line.strip().startswith('#')
+        )
+        
+        if not cleaned_data:
+            print("오류: API 응답에 유효한 데이터가 없습니다. 원시 응답:\n", response.text)
+            return None
+
+        try:
+            df = pd.read_csv(io.StringIO(cleaned_data))
+        except pd.errors.EmptyDataError:
+            print("오류: pandas가 읽을 데이터가 없습니다. 원시 응답:\n", response.text)
+            return None
+        except Exception as e:
+            print(f"오류: pandas 데이터 처리 중 예외 발생: {e}. 원시 응답:\n", response.text)
+            return None
+
+        df.columns = df.columns.str.strip()
+        
+        # 필요한 컬럼만 선택하여 리스트로 변환
+        if not df.empty:
+            # TM_EF 컬럼의 데이터를 문자열로 변환하고 필요한 부분만 추출
+            df['TM_EF_STR'] = df['TM_EF'].astype(str)
+            # WF, TA, ST, WS, SKY 컬럼도 함께 반환
+            return df[['TM_EF_STR', 'WF', 'SKY', 'TA', 'ST', 'WS']].to_dict(orient='records')
+        return []
+
+    except requests.exceptions.RequestException as e:
+        print(f"API 요청 중 오류가 발생했습니다: {e}")
+        return None
+    except Exception as e:
+        print(f"데이터 처리 중 오류가 발생했습니다: {e}")
+        return None
+
+@app.route('/weather')
+def weather_api():
+    forecast_data = get_regional_forecast_data(AUTH_KEY, REGION_CODE_NAMYANGJU)
+    if forecast_data is None:
+        return jsonify({"error": "날씨 정보를 가져오지 못했습니다."}), 500
+    return jsonify(forecast_data)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True) 

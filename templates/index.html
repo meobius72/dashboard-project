@@ -3,298 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>통합 대시보드</title>
+    <title>대시보드</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; overflow-x: hidden; }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; max-width: 1920px; margin: 0 auto; box-sizing: border-box; }
-        .panel { background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 10px; padding: 20px; flex: 1; min-width: 300px; box-sizing: border-box; }
-        .panel.youtube {
-            flex-basis: calc(100% - 20px);
-            max-width: calc(100% - 20px);
-            overflow-y: auto;
+        body {
+            font-family: 'Noto Sans KR', sans-serif; /* 한국어 폰트 추가 */
+            margin: 0;
+            padding: 0; /* 전체 패딩 제거, 컨테이너에서 관리 */
+            background-color: #1a1a2e; /* 어두운 배경 */
+            color: #e0e0e0;
         }
-        .panel.weather {
-            flex-basis: calc(50% - 20px);
-            max-width: calc(50% - 20px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
+        .dashboard-container {
+            display: grid;
+            gap: 20px;
+            max-width: 1300px; /* 너비 확장 */
+            margin: 20px auto; /* 상하 여백 추가 */
+            padding: 20px; /* 내부 패딩 */
         }
-        .weather-info {
-            margin-top: 15px;
-            font-size: 1.2em;
+        .top-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Video takes more space than announcements */
+            gap: 20px;
         }
-        .weather-info p {
-            margin: 5px 0;
+        .video-section {
+            background-color: #2a2a4e; /* 어두운 색상 */
+            color: #e0e0e0;
+            padding: 0; /* 내부 패딩은 헤더에서 관리 */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
         }
-        .weather-error {
-            color: red;
+        .video-section iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .video-header {
+            background-color: #6a0dad; /* 보라색 계열 */
+            padding: 10px 20px;
+            margin-bottom: 20px; /* 헤더 아래 여백 */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
             font-weight: bold;
-            margin-top: 10px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
         }
-        .notice-list li .date { font-size: 0.85em; color: #666; white-space: nowrap; margin-left: 10px; }
-        /* 해상도 표시를 위한 CSS */
-        /*
-        #resolution-display {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
+        .video-header svg { /* 아이콘 스타일 */
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .video-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #aaa;
+        }
+        .announcement-section {
+            background-color: #2a2a4e; /* 어두운 색상 */
+            padding: 0; /* 내부 패딩은 헤더에서 관리 */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .announcement-header {
+            background-color: #6a0dad; /* 보라색 계열 */
+            padding: 10px 20px;
+            margin-bottom: 20px; /* 헤더 아래 여백 */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+        .announcement-header svg { /* 아이콘 스타일 */
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .announcement-tabs {
+            display: flex;
+            border-bottom: 1px solid #4a4a6e; /* 어두운 경계선 */
+            margin: 0 20px 15px 20px; /* 좌우 패딩 */
+        }
+        .announcement-tabs button {
+            background-color: #3a3a5e; /* 어두운 탭 배경 */
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            flex-grow: 1;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            color: #ccc;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .announcement-tabs button.active {
+            background-color: #007bff; /* 활성 탭 파란색 */
             color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            z-index: 1000;
+            border-bottom: 2px solid #007bff; /* 활성 탭 아래줄 강조 */
         }
-        */
+        .announcement-tabs button:hover:not(.active) {
+            background-color: #4a4a6e;
+            color: #eee;
+        }
+        .tab-content {
+            display: none;
+            padding: 0 20px; /* 좌우 패딩 */
+            max-height: 300px; /* 스크롤을 위한 최대 높이 */
+            overflow-y: auto; /* 내용이 넘치면 스크롤 */
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .announcement-item {
+            background-color: #3a3a5e; /* 항목 배경색 */
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .announcement-item:hover {
+            background-color: #4a4a6e;
+        }
+        .announcement-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+        .announcement-item div:first-child {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+        }
+        .announcement-item .date {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        .weather-section {
+            background-color: #2a2a4e; /* 어두운 배경 */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column; /* 세로로 정렬 */
+        }
+        .weather-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #e0e0e0;
+        }
+        .weather-header .location {
+            display: flex;
+            align-items: center;
+        }
+        .weather-header .location svg {
+            margin-right: 8px;
+            width: 24px;
+            height: 24px;
+            fill: #007bff; /* 파란색 아이콘 */
+        }
+        .weather-cards-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start; /* 상단 정렬 */
+            flex-wrap: wrap; /* 반응형 */
+            overflow-x: auto; /* 가로 스크롤 */
+            padding-bottom: 10px; /* 스크롤바 공간 */
+        }
+        .weather-card {
+            background-color: #3a3a5e; /* 카드 배경색 */
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px;
+            min-width: 140px; /* 카드 너비 조정 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            color: #e0e0e0;
+        }
+        .weather-card .time {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            color: #007bff; /* 시간 파란색 */
+        }
+        .weather-card .icon {
+            font-size: 2.5em; /* 아이콘 크기 키움 */
+            margin-bottom: 8px;
+        }
+        .weather-card .temp {
+            font-size: 1.8em; /* 온도 크기 키움 */
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .weather-card .details {
+            font-size: 0.9em;
+            color: #aaa;
+            line-height: 1.4;
+        }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- <div id="resolution-display"></div> -->
-    <!-- <header style="background-color: #007bff; color: white; padding: 15px 20px; text-align: center;">
-        <h1>통합 대시보드</h1>
-    </header> -->
-
-    <div class="container">
-        <div class="panel youtube">
-            <h2>교육원 홍보영상</h2>
-            <div class="youtube-player">
-                <iframe id="youtube-player" src="https://www.youtube.com/embed/vsSxqmwnYvA?mute=1&loop=1&autoplay=1&playlist=yCp0I4KuWJo"
-                        frameborder="0" allowfullscreen></iframe>
+    <div class="dashboard-container">
+        <div class="top-section">
+            <div class="video-section">
+                <div class="video-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-3 10l-7-4V7l7 4v4z"></path></svg>
+                    교육원 홍보 동영상
+                </div>
+                <!-- YouTube 또는 Vimeo 임베드 코드 (16:9 비율 유지) -->
+                <!-- 예시: <iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe> -->
+                <iframe src="https://www.youtube.com/embed/vsSxqmwnYvA?mute=1&loop=1&autoplay=1&playlist=yCp0I4KuWJo" style="position:absolute;width:100%;height:100%;left:0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
-            <div class="youtube-controls" style="text-align: center; margin-top: 10px;">
-                <button onclick="playPreviousVideo()">이전</button>
-                <button onclick="playNextVideo()">다음</button>
+
+            <div class="announcement-section">
+                <div class="announcement-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"></path></svg>
+                    공지사항
+                </div>
+                <div class="announcement-tabs">
+                    <button class="tab-button active" onclick="openTab(event, 'tsNotice')">TS 국가자격시험</button>
+                    <button class="tab-button" onclick="openTab(event, 'aviationAlert')">항공교육 알림</button>
+                    <button class="tab-button" onclick="openTab(event, 'aviationNotice')">항공교육 공지</button>
+                </div>
+
+                <div id="tsNotice" class="tab-content active">
+                    <div class="announcement-item">
+                        <div>2025년 제1회 교통안전관리자 자격시험 시행계획 공고</div>
+                        <div class="date">2025.01.15</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div>2025년 위험물 운송차량 운전자격 시험일정 안내</div>
+                        <div class="date">2025.01.10</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div>교통안전관리자 자격시험 응시 서류 변경 안내</div>
+                        <div class="date">2024.12.28</div>
+                    </div>
+                </div>
+
+                <div id="aviationAlert" class="tab-content">
+                    <div class="announcement-item">
+                        <div>2025년 항공정비 교육과정 수강신청 알림</div>
+                        <div class="date">2025.01.16</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div>항공교육훈련원 휴무일정 안내</div>
+                        <div class="date">2025.01.12</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div>2025년 항공 특별교육 일정 공지</div>
+                        <div class="date">2025.01.08</div>
+                    </div>
+                </div>
+
+                <div id="aviationNotice" class="tab-content">
+                    <div class="announcement-item">
+                        <div>항공정비사 자격증명 교육과정 모집 공고</div>
+                        <div class="date">2025.01.14</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div>항공교육훈련포털 시스템 점검 안내</div>
+                        <div class="date">2025.01.09</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div>2025년 항공 교육과정 운영계획 발표</div>
+                        <div class="date">2025.01.05</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="panel weather">
-            <h2>하계동 날씨 정보</h2>
-            <div id="weather-data" class="weather-info">
-                <p>온도: <span id="current-temp">로딩 중...</span></p>
-                <p>강수량: <span id="current-rain">로딩 중...</span></p>
-                <p>습도: <span id="current-humi">로딩 중...</span></p>
+        <div class="weather-section">
+            <div class="weather-header">
+                <div class="location">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+                    <span>경기기계공업고등학교</span>
+                </div>
+                <div>2025년 6월 12일 목요일</div>
+                <div>최종 업데이트 오전 10:34</div>
             </div>
-            <div id="weather-error" class="weather-error"></div>
-        </div>
-
-        <div class="panel">
-            <h2>TS 국가자격시험 공지사항</h2>
-            <div id="kotsa-notices" class="notice-list">
-                <p>로딩 중...</p>
+            <div class="weather-cards-container">
+                <div class="weather-card">
+                    <div class="time">07:00</div>
+                    <div class="icon">☀️</div>
+                    <div class="temp">18℃</div>
+                    <div class="details">강수 10%<br>바람 2.3m/s</div>
+                </div>
+                <div class="weather-card">
+                    <div class="time">10:00</div>
+                    <div class="icon">☁️</div>
+                    <div class="temp">22℃</div>
+                    <div class="details">강수 20%<br>바람 1.8m/s</div>
+                </div>
+                <div class="weather-card">
+                    <div class="time">13:00</div>
+                    <div class="icon">🌧️</div>
+                    <div class="temp">25℃</div>
+                    <div class="details">강수 5%<br>바람 3.1m/s</div>
+                </div>
+                <div class="weather-card">
+                    <div class="time">16:00</div>
+                    <div class="icon">☔</div>
+                    <div class="temp">23℃</div>
+                    <div class="details">강수 65%<br>바람 4.2m/s</div>
+                </div>
+                <div class="weather-card">
+                    <div class="time">19:00</div>
+                    <div class="icon">❄️</div>
+                    <div class="temp">20℃</div>
+                    <div class="details">강수 30%<br>바람 2.7m/s</div>
+                </div>
             </div>
-        </div>
-
-        <div class="panel">
-            <h2>항공교육훈련포털 공지사항 (알림)</h2>
-            <div id="kaa-alarm-notices" class="notice-list">
-                <p>로딩 중...</p>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h2>항공교육훈련포털 공지사항 (공지)</h2>
-            <div id="kaa-numbered-notices" class="notice-list">
-                <p>로딩 중...</p>
-            </div>
-        </div>
-
-        <div class="controls panel">
-            <h2>화면 갱신 주기 설정</h2>
-            <input type="number" id="refresh-interval-input" value="300" min="60" step="60">
-            <button id="set-refresh-interval-btn">설정</button>
+            <div id="weather-error-message" style="text-align: right; color: red; font-size: 0.9em; margin-top: 10px; display: none;">날씨 정보 수집 오류</div>
         </div>
     </div>
 
-    <footer style="background-color: #333; color: white; text-align: center; padding: 10px 0; position: relative; bottom: 0; width: 100%;">
-        <p>&copy; 2023 통합 대시보드. 모든 권리 보유.</p>
-    </footer>
-
     <script>
-        var player;
-        var currentVideoId = '{{ current_video_id }}';
-        var refreshInterval = 300;
-        var refreshTimer;
-
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('youtube-player', {
-                height: '100%',
-                width: '100%',
-                videoId: currentVideoId,
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 1,
-                    'loop': 1,
-                    'playlist': currentVideoId,
-                    'mute': 1
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            event.target.playVideo();
-            startRefreshTimer();
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.ENDED) {
-                // playNextVideo();
+        function openTab(evt, tabName) {
+            var i, tabcontent, tabbuttons;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
             }
-        }
-
-        function playNextVideo() {
-            fetch('/next_video')
-                .then(response => response.json())
-                .then(data => {
-                    player.loadVideoById(data.video_id);
-                    currentVideoId = data.video_id;
-                })
-                .catch(error => console.error('다음 동영상 로드 오류:', error));
-        }
-
-        function playPreviousVideo() {
-            fetch('/prev_video')
-                .then(response => response.json())
-                .then(data => {
-                    player.loadVideoById(data.video_id);
-                    currentVideoId = data.video_id;
-                })
-                .catch(error => console.error('이전 동영상 로드 오류:', error));
-        }
-
-        function fetchWeatherData() {
-            console.log('fetchWeatherData 함수 호출됨');
-            fetch('/get_weather')
-                .then(response => response.json())
-                .then(data => {
-                    const tempElement = document.getElementById('current-temp');
-                    const rainElement = document.getElementById('current-rain');
-                    const humiElement = document.getElementById('current-humi');
-                    const errorElement = document.getElementById('weather-error');
-
-                    if (data.error) {
-                        tempElement.textContent = '오류';
-                        rainElement.textContent = '오류';
-                        humiElement.textContent = '오류';
-                        errorElement.textContent = `날씨 정보 오류: ${data.error}`;
-                        console.error('날씨 정보 API 오류:', data.error);
-                    } else {
-                        tempElement.textContent = data.temperature ? `${data.temperature}°C` : 'N/A';
-                        rainElement.textContent = data.rainfall ? `${data.rainfall}mm` : 'N/A';
-                        humiElement.textContent = data.humidity ? `${data.humidity}%` : 'N/A';
-                        errorElement.textContent = ''; // 오류 메시지 초기화
-                        console.log('날씨 정보 성공적으로 로드됨:', data);
-                    }
-                })
-                .catch(error => {
-                    const errorElement = document.getElementById('weather-error');
-                    errorElement.textContent = `날씨 정보 로드 중 오류 발생: ${error}`;
-                    console.error('날씨 정보 fetch 오류:', error);
-                });
-        }
-
-        function updateDashboardData() {
-            console.log('updateDashboardData 함수 호출됨');
-            // 공지사항 갱신
-            fetch('/get_notices')
-                .then(response => response.json())
-                .then(data => {
-                    if (data && !data.error) {
-                        var kotsaNoticesHtml = '';
-                        data.kotsa_notices.forEach(function(notice) {
-                            kotsaNoticesHtml += `<li><a href="https://lic.kotsa.or.kr/tsportal/board/view.do?manage_idx=10&menu_idx=9&board_idx=${notice.link_id}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
-                        });
-                        document.getElementById('kotsa-notices').innerHTML = `<ul>${kotsaNoticesHtml}</ul>`;
-
-                        var kaaAlarmNoticesHtml = '';
-                        data.kaa_notices.alarm_notices.forEach(function(notice) {
-                            kaaAlarmNoticesHtml += `<li><a href="https://www.kaa.atims.kr/pubs/notice/notice/ViewAction.do?noti_idx=${notice.link_id}" target="_blank">[알림] ${notice.title}</a> <span class="date">${notice.date}</span></li>`;
-                        });
-                        document.getElementById('kaa-alarm-notices').innerHTML = `<ul>${kaaAlarmNoticesHtml}</ul>`;
-
-                        var kaaNumberedNoticesHtml = '';
-                        data.kaa_notices.numbered_notices.forEach(function(notice) {
-                            kaaNumberedNoticesHtml += `<li><a href="https://www.kaa.atims.kr/pubs/notice/notice/ViewAction.do?noti_idx=${notice.link_id}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
-                        });
-                        document.getElementById('kaa-numbered-notices').innerHTML = `<ul>${kaaNumberedNoticesHtml}</ul>`;
-
-                    } else if (data && data.error) {
-                        document.getElementById('kotsa-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
-                        document.getElementById('kaa-alarm-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
-                        document.getElementById('kaa-numbered-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
-                    }
-                })
-                .catch(error => console.error('공지사항 갱신 오류:', error));
-
-            fetchWeatherData();
-        }
-
-        function startRefreshTimer() {
-            if (refreshTimer) {
-                clearInterval(refreshTimer);
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
             }
-            refreshTimer = setInterval(updateDashboardData, refreshInterval * 1000);
-            console.log('대시보드 갱신 주기가 ' + refreshInterval + '초로 설정되었습니다.');
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // 해상도 표시
-            /*
-            const resolutionDisplay = document.getElementById('resolution-display');
-            if (resolutionDisplay) {
-                const screenWidth = window.screen.width;
-                const screenHeight = window.screen.height;
-                resolutionDisplay.textContent = `화면 해상도: ${screenWidth}x${screenHeight}`;
-            }
-            */
-
-            fetch('/get_refresh_interval')
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.interval) {
-                        refreshInterval = data.interval;
-                        document.getElementById('refresh-interval-input').value = refreshInterval;
-                        console.log('초기 갱신 주기: ' + refreshInterval + '초');
-                    }
-                })
-                .catch(error => console.error('갱신 주기 가져오기 오류:', error));
-
-            updateDashboardData();
-
-            document.getElementById('set-refresh-interval-btn').addEventListener('click', function() {
-                var newInterval = document.getElementById('refresh-interval-input').value;
-                fetch('/set_refresh_interval', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ interval: parseInt(newInterval) }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        refreshInterval = data.new_interval;
-                        startRefreshTimer();
-                        alert('갱신 주기가 성공적으로 설정되었습니다: ' + refreshInterval + '초');
-                    } else {
-                        alert('갱신 주기 설정 오류: ' + data.message);
-                    }
-                })
-                .catch(error => console.error('갱신 주기 설정 중 오류 발생:', error));
-            });
+        // 초기 로드 시 첫 번째 탭 활성화
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelector(".tab-button").click();
+            updateWeatherDisplay(); // 날씨 정보 업데이트 함수 호출
         });
+
+        // 날씨 데이터를 가져오는 함수 (Flask 서버에서 실제 데이터 사용)
+        async function fetchWeatherData() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/weather');
+                if (!response.ok) {
+                    // HTTP 오류 발생 시, 오류 메시지를 포함하여 reject
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}. Response: ${errorText}`);
+                }
+                const data = await response.json();
+                // weather1.py의 출력 형태인 TM_EF_STR, WF, SKY, TA, ST, WS를 가정
+                return data.map(item => ({
+                    TM_EF: item.TM_EF_STR, // Flask에서 TM_EF_STR로 반환되도록 변경
+                    WF: item.WF,
+                    SKY: item.SKY,
+                    TA: item.TA,
+                    ST: item.ST,
+                    WS: item.WS
+                }));
+            } catch (error) {
+                console.error('날씨 데이터를 가져오는 중 오류 발생:', error);
+                document.getElementById('weather-error-message').style.display = 'block'; // 오류 메시지 표시
+                return []; // 오류 발생 시 빈 배열 반환
+            }
+        }
+
+        // 날씨 아이콘 매핑
+        const skyCodes = {
+            'DB01': '☀️', // 맑음
+            'DB02': '⛅', // 구름조금
+            'DB03': '☁️', // 구름많음
+            'DB04': '🌧️'  // 흐림 (비/눈도 포함)
+        };
+        const weatherIcons = {
+            '맑음': '☀️',
+            '구름조금': '⛅',
+            '구름많음': '☁️',
+            '흐림': '☁️',
+            '비': '☔',
+            '눈': '❄️'
+        };
+
+
+        // 날씨 정보를 HTML에 업데이트하는 함수
+        async function updateWeatherDisplay() {
+            document.getElementById('weather-error-message').style.display = 'none'; // 초기화 시 오류 메시지 숨김
+            const forecastData = await fetchWeatherData();
+            const weatherCardsContainer = document.querySelector('.weather-cards-container');
+            
+            if (forecastData && forecastData.length > 0) {
+                weatherCardsContainer.innerHTML = ''; // 기존 카드 초기화
+                forecastData.forEach(row => {
+                    const dt_obj = new Date(row.TM_EF.substring(0, 4), row.TM_EF.substring(4, 6) - 1, row.TM_EF.substring(6, 8), row.TM_EF.substring(8, 10), row.TM_EF.substring(10, 12));
+                    const timeText = dt_obj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    const skyStatus = skyCodes[row.SKY] || weatherIcons[row.WF] || '❓'; // SKY 코드 또는 WF에 따른 아이콘
+
+                    const weatherCard = `
+                        <div class="weather-card">
+                            <div class="time">${timeText}</div>
+                            <div class="icon">${skyStatus}</div>
+                            <div class="temp">${row.TA}℃</div>
+                            <div class="details">강수 ${row.ST}%<br>바람 ${row.WS}m/s</div>
+                        </div>
+                    `;
+                    weatherCardsContainer.innerHTML += weatherCard;
+                });
+            } else {
+                // 데이터가 없을 때, 기존 카드(플레이스홀더)를 지우지 않음. 
+                // 대신, 이미 `fetchWeatherData`에서 오류 메시지를 표시했으므로 여기서는 추가 작업 없이 종료.
+                // 처음 로드 시 기본 카드(플레이스홀더)가 HTML에 이미 있으므로.
+                console.log("날씨 데이터 없음 또는 오류 발생. 기존 날씨 카드 유지.");
+            }
+            
+            // 현재 날짜 및 업데이트 시간 업데이트
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const dayOfWeek = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'][now.getDay()];
+            const updateTime = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+            document.querySelector('.weather-header > div:nth-child(2)').textContent = `${year}년 ${month}월 ${day}일 ${dayOfWeek}`;
+            document.querySelector('.weather-header > div:nth-child(3)').textContent = `최종 업데이트 ${updateTime}`;
+        }
     </script>
 </body>
 </html> 
