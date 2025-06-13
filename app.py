@@ -11,6 +11,8 @@ import sqlite3
 from flask_cors import CORS
 import io
 import pandas as pd
+from bs4 import BeautifulSoup
+import urllib.parse
 
 app = Flask(__name__)
 CORS(app) # 모든 경로에 대해 CORS 허용
@@ -34,6 +36,12 @@ DATABASE_FILE = 'weather_forecasts.db'
 # weather1.py에서 가져온 인증키 및 지역 코드
 AUTH_KEY = "6pbnk4lATQe55OJQG0Hzw"
 REGION_CODE_NAMYANGJU = "11B20502"
+
+# 기상청 API 설정
+WEATHER_API_KEY = "PcVFXfWoNUlki9AS6y8ODPyW2KZKyHfrGdy6rFnMUNIBZxhC2+KnUUekPDtfSBCRBWfR/G+9UpcQwuHBZFR+Xw=="
+WEATHER_API_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst"
+WEATHER_NX = "55"  # 경기기계공업고등학교 X좌표
+WEATHER_NY = "127"  # 경기기계공업고등학교 Y좌표
 
 def init_db():
     with app.app_context():
@@ -456,12 +464,10 @@ def get_weather():
 
 @app.route('/')
 def index():
-    kotsa_notices = scrape_kotsa_notices() # 최신 3개만 가져옴
-    kaa_notices = scrape_kaa_notices() # 알림 3개, 일반 3개 가져옴
-    return render_template('index.html',
-                           current_video_id=YOUTUBE_VIDEO_IDS[current_youtube_index],
-                           kotsa_notices=kotsa_notices,
-                           kaa_notices=kaa_notices)
+    # 날씨 정보 가져오기
+    weather_data = get_weather_data()
+    
+    return render_template('index.html', weather_data=weather_data)
 
 @app.route('/get_notices')
 def get_notices():
@@ -553,6 +559,63 @@ def weather_api():
     if forecast_data is None:
         return jsonify({"error": "날씨 정보를 가져오지 못했습니다."}), 500
     return jsonify(forecast_data)
+
+def get_weather_data():
+    try:
+        # 현재 시간 기준으로 base_date와 base_time 설정
+        now = datetime.now()
+        base_date = now.strftime("%Y%m%d")
+        base_time = now.strftime("%H00")
+        
+        # API 요청 파라미터 설정
+        params = {
+            'serviceKey': WEATHER_API_KEY,
+            'pageNo': '1',
+            'numOfRows': '1000',
+            'dataType': 'XML',
+            'base_date': base_date,
+            'base_time': base_time,
+            'nx': WEATHER_NX,
+            'ny': WEATHER_NY
+        }
+        
+        # API 요청
+        response = requests.get(WEATHER_API_URL, params=params)
+        
+        # XML 파싱
+        soup = BeautifulSoup(response.text, 'xml')
+        
+        # 에러 체크
+        result_code = soup.find('resultCode').text
+        if result_code != '00':
+            error_msg = soup.find('resultMsg').text
+            return {'error': f'날씨 정보 조회 실패: {error_msg}'}
+        
+        # 날씨 데이터 파싱
+        items = soup.find_all('item')
+        weather_data = {}
+        
+        for item in items:
+            category = item.find('category').text
+            value = item.find('obsrValue').text
+            
+            if category == 'T1H':  # 기온
+                weather_data['temperature'] = f"{value}°C"
+            elif category == 'RN1':  # 1시간 강수량
+                weather_data['rainfall'] = f"{value}mm"
+            elif category == 'REH':  # 습도
+                weather_data['humidity'] = f"{value}%"
+            elif category == 'WSD':  # 풍속
+                weather_data['wind_speed'] = f"{value}m/s"
+            elif category == 'VEC':  # 풍향
+                weather_data['wind_direction'] = value
+            elif category == 'PTY':  # 강수형태
+                weather_data['precipitation_type'] = value
+        
+        return weather_data
+        
+    except Exception as e:
+        return {'error': f'날씨 정보 조회 중 오류 발생: {str(e)}'}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True) 
