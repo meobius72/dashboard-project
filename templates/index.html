@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>대시보드</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif; /* 한국어 폰트 추가 */
@@ -221,6 +223,36 @@
             text-align: center;
             padding: 20px;
         }
+        .weather-graph-container {
+            background-color: #2a2a4e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
+        }
+        .weather-graph-header {
+            background-color: #6a0dad;
+            padding: 10px 20px;
+            margin: -20px -20px 20px -20px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            color: #e0e0e0;
+        }
+        .weather-graph-header svg {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .weather-graph {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -249,82 +281,48 @@
                 </div>
 
                 <div id="tsNotice" class="tab-content active">
-                    <div class="announcement-item">
-                        <div>2025년 제1회 교통안전관리자 자격시험 시행계획 공고</div>
-                        <div class="date">2025.01.15</div>
-                    </div>
-                    <div class="announcement-item">
-                        <div>2025년 위험물 운송차량 운전자격 시험일정 안내</div>
-                        <div class="date">2025.01.10</div>
-                    </div>
-                    <div class="announcement-item">
-                        <div>교통안전관리자 자격시험 응시 서류 변경 안내</div>
-                        <div class="date">2024.12.28</div>
-                    </div>
+                    <ul id="kotsa-notices"></ul>
                 </div>
 
                 <div id="aviationAlert" class="tab-content">
-                    <div class="announcement-item">
-                        <div>2025년 항공정비 교육과정 수강신청 알림</div>
-                        <div class="date">2025.01.16</div>
-                    </div>
-                    <div class="announcement-item">
-                        <div>항공교육훈련원 휴무일정 안내</div>
-                        <div class="date">2025.01.12</div>
-                    </div>
-                    <div class="announcement-item">
-                        <div>2025년 항공 특별교육 일정 공지</div>
-                        <div class="date">2025.01.08</div>
-                    </div>
+                    <ul id="kaa-alarm-notices"></ul>
                 </div>
 
                 <div id="aviationNotice" class="tab-content">
-                    <div class="announcement-item">
-                        <div>항공정비사 자격증명 교육과정 모집 공고</div>
-                        <div class="date">2025.01.14</div>
-                    </div>
-                    <div class="announcement-item">
-                        <div>항공교육훈련포털 시스템 점검 안내</div>
-                        <div class="date">2025.01.09</div>
-                    </div>
-                    <div class="announcement-item">
-                        <div>2025년 항공 교육과정 운영계획 발표</div>
-                        <div class="date">2025.01.05</div>
-                    </div>
+                    <ul id="kaa-numbered-notices"></ul>
                 </div>
             </div>
+        </div>
+
+        <!-- 대시보드 설정 섹션 추가 -->
+        <div class="settings-section" style="background-color: #2a2a4e; padding: 20px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); margin-top: 20px;">
+            <h2>대시보드 설정</h2>
+            <label for="refresh-interval-input">갱신 주기 (초):</label>
+            <input type="number" id="refresh-interval-input" value="300" min="60" style="padding: 8px; margin-left: 10px; border-radius: 4px; border: 1px solid #4a4a6e; background-color: #3a3a5e; color: #e0e0e0;">
+            <button id="set-refresh-interval-btn" style="padding: 8px 15px; margin-left: 10px; border-radius: 4px; border: none; background-color: #6a0dad; color: white; cursor: pointer;">설정</button>
         </div>
 
         <!-- 시간별 날씨 예보 섹션 -->
         <div class="weather-forecast-container">
-            <div class="weather-forecast-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M16.56 3.04C14.7 1.18 12.18 0 9.5 0c-4.42 0-8 3.58-8 8 0 2.21 1.01 4.21 2.58 5.59-1.07 1.05-1.78 2.45-1.95 3.96h.02c.07.61.16 1.15.26 1.69.17 1.05.7 2.01 1.5 2.75 1.07 1 2.37 1.63 3.82 1.9s2.96.22 4.41-.01c1.45-.23 2.76-.86 3.83-1.89 1.03-.99 1.72-2.27 1.95-3.69.23-1.42.1-2.87-.3-4.22-.38-1.3-.9-2.5-1.57-3.62.83-.81 1.64-1.83 2.22-2.98.53-.98.85-2.07.95-3.2.1-1.13.01-2.26-.26-3.37-.36-1.46-.9-2.73-1.63-3.8zM9.5 2C11.66 2 13.62 2.8 15.08 4.24c.73 1.08 1.25 2.26 1.48 3.53.22 1.27.1 2.56-.3 3.8-.4 1.25-.97 2.43-1.72 3.5-1.08 1.5-2.58 2.5-4.28 2.87-1.7.37-3.48.25-5.07-.34-1.6-.6-2.9-1.6-3.7-2.9-1.2-1.9-1.7-4.2-1.2-6.5C4.2 4.4 6.7 2 9.5 2z" fill="currentColor"/></svg>
-                경기기계공업고등학교 시간별 날씨 예보
-            </div>
-            <div class="hourly-forecast-grid" id="weather-forecast-grid">
-                <!-- 날씨 예측 데이터가 여기에 동적으로 로드됩니다. -->
-                {% if weather_data and weather_data.forecasts %}
-                    {% for forecast in weather_data.forecasts %}
-                    <div class="forecast-card">
-                        <div class="time">{{ forecast.forecast_time[11:13] }}시</div>
-                        <div class="icon">
-                            <!-- 날씨 상태에 따른 아이콘 (예: 맑음, 흐림, 비, 눈 등) -->
-                            <i class="wi" id="weather-icon-{{ loop.index0 }}"></i>
-                        </div>
-                        <div class="temp">{{ "%.1f" | format(forecast.weather.temperature_celsius) }}°C</div>
-                        <div class="details">
-                            강수: {{ forecast.weather.precipitation_type }} ({{ "%.1f" | format(forecast.weather.precipitation_mm) }}mm)<br/>
-                            바람: {{ "%.1f" | format(forecast.weather.wind_speed_ms) }}m/s<br/>
-                            습도: {{ "%.0f" | format(forecast.weather.humidity_percent) }}%
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="error-message" id="weather-error-message">날씨 정보를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
-                {% endif %}
+            <h2>시간별 날씨 예보</h2>
+            <div class="weather-cards hourly-forecast-grid">
+                <!-- 날씨 카드는 JavaScript에서 동적으로 로드됩니다. -->
+                <div class="no-data">날씨 데이터를 불러오는 중...</div>
             </div>
         </div>
 
+        <!-- 시간별 날씨 그래프 섹션 -->
+        <div class="weather-graph-container">
+            <div class="weather-graph-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M3.5 18.5l6-6 4 4L22 6.92 20.59 5.5l-7.09 8.5-4-4L2 17.5z" fill="currentColor"/>
+                </svg>
+                시간별 날씨 예보 그래프
+            </div>
+            <div class="weather-graph">
+                <canvas id="weatherChart"></canvas>
+            </div>
+        </div>
     </div>
 
     <footer style="background-color: #333; color: white; text-align: center; padding: 10px 0; position: relative; bottom: 0; width: 100%;">
@@ -407,13 +405,13 @@
 
                         var kaaAlarmNoticesHtml = '';
                         data.kaa_notices.alarm_notices.forEach(function(notice) {
-                            kaaAlarmNoticesHtml += `<li><a href="https://www.kaa.atims.kr/pubs/notice/notice/ViewAction.do?noti_idx=${notice.link_id}" target="_blank">[알림] ${notice.title}</a> <span class="date">${notice.date}</span></li>`;
+                            kaaAlarmNoticesHtml += `<li><a href="${notice.link}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
                         });
                         document.getElementById('kaa-alarm-notices').innerHTML = `<ul>${kaaAlarmNoticesHtml}</ul>`;
 
                         var kaaNumberedNoticesHtml = '';
                         data.kaa_notices.numbered_notices.forEach(function(notice) {
-                            kaaNumberedNoticesHtml += `<li><a href="https://www.kaa.atims.kr/pubs/notice/notice/ViewAction.do?noti_idx=${notice.link_id}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
+                            kaaNumberedNoticesHtml += `<li><a href="${notice.link}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
                         });
                         document.getElementById('kaa-numbered-notices').innerHTML = `<ul>${kaaNumberedNoticesHtml}</ul>`;
 
@@ -460,6 +458,9 @@
 
             updateDashboardData(); // 초기 공지사항 로드
 
+            // 초기 날씨 데이터 로드 및 그래프 업데이트를 fetchWeatherForecast 함수로 처리합니다.
+            fetchWeatherForecast();
+
             document.getElementById('set-refresh-interval-btn').addEventListener('click', function() {
                 var newInterval = document.getElementById('refresh-interval-input').value;
                 fetch('/set_refresh_interval', {
@@ -483,7 +484,6 @@
             });
 
             openTab(null, 'tsNotice');
-            fetchWeatherForecast(); // 초기 날씨 데이터 로드
             fetchNotices(); // 초기 공지사항 데이터 로드
 
             // 날씨 데이터 주기적으로 업데이트 (예: 5분마다)
@@ -508,153 +508,222 @@
             }
         }
 
-        // 날씨 아이콘 매핑 함수
-        function getWeatherIcon(pty, sky) {
-            // 강수 형태(PTY) 우선
-            if (pty === 1) return "wi-rain"; // 비
-            if (pty === 2) return "wi-sleet"; // 비/눈
-            if (pty === 3) return "wi-snow"; // 눈
-            if (pty === 4) return "wi-thunderstorm"; // 소나기
-            if (pty === 5) return "wi-rain-mix"; // 빗방울
-            if (pty === 6) return "wi-rain-mix"; // 빗방울눈날림
-            if (pty === 7) return "wi-snow"; // 눈날림
-
-            // 하늘 상태(SKY)
-            if (sky === 1) return "wi-day-sunny"; // 맑음
-            if (sky === 3) return "wi-cloudy"; // 구름많음
-            if (sky === 4) return "wi-cloudy"; // 흐림
-
-            return "wi-na"; // 정보 없음 (Not Available)
+        function fetchNotices() {
+            updateDashboardData();
         }
 
-        // 날씨 상태 텍스트 매핑 함수 (옵션: 필요에 따라 사용)
-        function getWeatherStatusText(pty, sky) {
-            if (pty === 1) return "비";
-            if (pty === 2) return "비/눈";
-            if (pty === 3) return "눈";
-            if (pty === 4) return "소나기";
-            if (pty === 5) return "빗방울";
-            if (pty === 6) return "진눈개비";
-            if (pty === 7) return "눈날림";
-
-            if (sky === 1) return "맑음";
-            if (sky === 3) return "구름많음";
-            if (sky === 4) return "흐림";
-
-            return "알 수 없음";
+        // 날씨 상태에 따른 아이콘 매핑 함수
+        function getWeatherIcon(skyStatus, precipitationType) {
+            // 하늘 상태와 강수 형태를 기반으로 아이콘 결정
+            if (precipitationType === "비") {
+                return "wi wi-rain";
+            } else if (precipitationType === "비/눈") {
+                return "wi wi-rain-mix";
+            } else if (precipitationType === "눈") {
+                return "wi wi-snow";
+            } else if (precipitationType === "소나기") {
+                return "wi wi-showers";
+            } else if (precipitationType === "빗방울") {
+                return "wi wi-sprinkle";
+            } else if (precipitationType === "빗방울/눈날림") {
+                return "wi wi-sleet";
+            } else if (precipitationType === "눈날림") {
+                return "wi wi-snow-wind";
+            } else {
+                // 강수 없을 때는 하늘 상태에 따라 결정
+                if (skyStatus === "맑음") {
+                    return "wi wi-day-sunny";
+                } else if (skyStatus === "구름많음") {
+                    return "wi wi-cloudy";
+                } else if (skyStatus === "흐림") {
+                    return "wi wi-cloud";
+                } else {
+                    return "wi wi-na"; // 정보 없음
+                }
+            }
         }
 
-        // 날씨 데이터를 가져와서 업데이트하는 함수
-        function fetchWeatherForecast() {
-            fetch('/get_weather_data')
-                .then(response => response.json())
-                .then(data => {
-                    const weatherGrid = document.getElementById('weather-forecast-grid');
-                    weatherGrid.innerHTML = ''; // 기존 내용 지우기
+        // 날씨 카드 업데이트 함수
+        function updateWeatherCards(weatherData) {
+            const container = document.querySelector('.weather-cards.hourly-forecast-grid');
+            if (!container) return;
 
-                    if (data.forecasts && data.forecasts.length > 0) {
-                        data.forecasts.forEach((forecast, index) => {
-                            const forecastCard = document.createElement('div');
-                            forecastCard.className = 'forecast-card';
+            container.innerHTML = ''; // 기존 카드 제거
 
-                            // 시간 표시 포맷팅
-                            const fcstTimeHour = forecast.forecast_time.substring(11, 13);
+            if (!weatherData || weatherData.length === 0) {
+                container.innerHTML = '<div class="error-message">날씨 정보를 불러올 수 없습니다.</div>';
+                return;
+            }
 
-                            const iconClass = getWeatherIcon(forecast.weather.precipitation_type_code, forecast.weather.sky_status_code); // PTY, SKY 원본 숫자값 사용
-                            const statusText = getWeatherStatusText(forecast.weather.precipitation_type_code, forecast.weather.sky_status_code); // PTY, SKY 원본 숫자값 사용
+            weatherData.forEach(forecast => {
+                const card = document.createElement('div');
+                card.className = 'weather-card';
 
-                            forecastCard.innerHTML = `
-                                <div class="time">${fcstTimeHour}시</div>
-                                <div class="icon"><i class="wi ${iconClass}"></i></div>
-                                <div class="temp">${forecast.weather.temperature_celsius}°C</div>
-                                <div class="details">
-                                    강수: ${forecast.weather.precipitation_type} (${forecast.weather.precipitation_mm}mm)<br/>
-                                    바람: ${forecast.weather.wind_speed_ms}m/s<br/>
-                                    습도: ${forecast.weather.humidity_percent}%
-                                </div>
-                            `;
-                            weatherGrid.appendChild(forecastCard);
-                            // 디버깅: 콘솔에 각 카드의 아이콘 클래스와 시간 출력
-                            console.log(`Card ${index}: Time=${fcstTimeHour}, Icon=${iconClass}, Status=${statusText}`);
-                        });
-                        document.getElementById('weather-error-message').style.display = 'none';
-                    } else {
-                        // 데이터가 없거나 오류 메시지가 있는 경우
-                        const errorMessageElement = document.getElementById('weather-error-message');
-                        if (errorMessageElement) {
-                            errorMessageElement.textContent = `날씨 API 오류: ${data.message || '데이터를 불러올 수 없습니다.'}`;
-                            errorMessageElement.style.display = 'block';
+                // 시간 표시 (HH시 형식)
+                const time = forecast.time.substring(0, 2) + '시';
+
+                // 날씨 아이콘 결정
+                const iconClass = getWeatherIcon(forecast.weather.sky_status, forecast.weather.precipitation_type);
+
+                card.innerHTML = `
+                    <div class="time">${time}</div>
+                    <div class="weather-icon"><i class="${iconClass}"></i></div>
+                    <div class="temperature">${forecast.weather.temperature_celsius}°C</div>
+                    <div class="details">
+                        <div class="precipitation">
+                            <i class="wi wi-umbrella"></i>
+                            ${forecast.weather.raw_precipitation_value}
+                        </div>
+                        <div class="wind">
+                            <i class="wi wi-strong-wind"></i>
+                            ${forecast.weather.wind_speed_ms}m/s
+                        </div>
+                        <div class="humidity">
+                            <i class="wi wi-humidity"></i>
+                            ${forecast.weather.humidity_percent}%
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // 날씨 그래프 업데이트 함수
+        function updateWeatherGraph(weatherData) {
+            const ctx = document.getElementById('weatherChart').getContext('2d');
+            
+             // 기존 차트가 있다면 제거
+             if (window.weatherChart instanceof Chart) { // Chart 인스턴스인지 확인
+                window.weatherChart.destroy();
+                window.weatherChart = null; // 차트 제거 후 null로 설정
+            }
+
+            // 데이터 준비
+            const labels = weatherData.map(forecast => forecast.time.substring(0, 2) + '시');
+            const temperatures = weatherData.map(forecast => forecast.weather.temperature_celsius);
+            const precipitation = weatherData.map(forecast => forecast.weather.precipitation_mm);
+            const humidity = weatherData.map(forecast => forecast.weather.humidity_percent);
+
+            // 차트 생성
+            window.weatherChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '기온 (°C)',
+                            data: temperatures,
+                            borderColor: '#ff6b6b',
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            yAxisID: 'y',
+                            tension: 0.4
+                        },
+                        {
+                            label: '강수량 (mm)',
+                            data: precipitation,
+                            borderColor: '#4dabf7',
+                            backgroundColor: 'rgba(77, 171, 247, 0.1)',
+                            yAxisID: 'y1',
+                            tension: 0.4
+                        },
+                        {
+                            label: '습도 (%)',
+                            data: humidity,
+                            borderColor: '#69db7c',
+                            backgroundColor: 'rgba(105, 219, 124, 0.1)',
+                            yAxisID: 'y',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '기온 (°C) / 습도 (%)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: '강수량 (mm)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0'
+                            }
                         }
                     }
-                })
-                .catch(error => {
-                    console.error('날씨 데이터 fetch 오류:', error);
-                    const errorMessageElement = document.getElementById('weather-error-message');
-                    if (errorMessageElement) {
-                        errorMessageElement.textContent = `날씨 데이터를 불러오지 못했습니다: ${error.message}`;
-                        errorMessageElement.style.display = 'block';
-                    }
-                });
+                }
+            });
         }
 
-        function fetchNotices() {
-            fetch('/get_notices')
-                .then(response => response.json())
+        // 날씨 데이터 가져오는 함수
+        function fetchWeatherForecast() {
+            fetch('/get_weather_data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    // TS 국가자격시험 공지사항
-                    const tsNoticeDiv = document.getElementById('tsNotice');
-                    tsNoticeDiv.innerHTML = ''; // 기존 내용 지우기
-                    data.ts_notices.forEach(notice => {
-                        const noticeItem = document.createElement('a'); // a 태그로 변경
-                        noticeItem.href = notice.link; // 링크 추가
-                        noticeItem.target = "_blank"; // 새 탭에서 열기
-                        noticeItem.className = 'announcement-item';
-                        noticeItem.innerHTML = `
-                            <div>${notice.title}</div>
-                            <div class="date">${notice.date}</div>
-                        `;
-                        tsNoticeDiv.appendChild(noticeItem);
-                    });
-
-                    // 항공교육 알림 공지사항
-                    const aviationAlertDiv = document.getElementById('aviationAlert');
-                    aviationAlertDiv.innerHTML = '';
-                    data.aviation_alerts.forEach(notice => {
-                        const noticeItem = document.createElement('a'); // a 태그로 변경
-                        noticeItem.href = notice.link;
-                        noticeItem.target = "_blank";
-                        noticeItem.className = 'announcement-item';
-                        noticeItem.innerHTML = `
-                            <div>${notice.title}</div>
-                            <div class="date">${notice.date}</div>
-                        `;
-                        aviationAlertDiv.appendChild(noticeItem);
-                    });
-
-                    // 항공교육 공지사항
-                    const aviationNoticeDiv = document.getElementById('aviationNotice');
-                    aviationNoticeDiv.innerHTML = '';
-                    data.aviation_notices.forEach(notice => {
-                        const noticeItem = document.createElement('a'); // a 태그로 변경
-                        noticeItem.href = notice.link;
-                        noticeItem.target = "_blank";
-                        noticeItem.className = 'announcement-item';
-                        noticeItem.innerHTML = `
-                            <div>${notice.title}</div>
-                            <div class="date">${notice.date}</div>
-                        `;
-                        aviationNoticeDiv.appendChild(noticeItem);
-                    });
-
+                    console.log("Received data from backend:", data);
+                    if (data && data.weather_data && data.weather_data.length > 0) {
+                        console.log("Weather data fetched successfully:", data.weather_data);
+                        updateWeatherCards(data.weather_data); // 날씨 카드 업데이트
+                        updateWeatherGraph(data.weather_data); // 날씨 그래프 업데이트
+                    } else {
+                        console.log("No weather data or empty data received.");
+                        // 데이터가 없을 때 카드와 그래프를 비우거나 오류 메시지 표시
+                        updateWeatherCards([]);
+                        updateWeatherGraph([]);
+                    }
                 })
                 .catch(error => {
-                    console.error('공지사항 데이터 fetch 오류:', error);
-                    // 오류 메시지 표시 (선택 사항)
+                    console.error("Fetching weather data failed:", error);
+                    // 오류 발생 시 카드와 그래프를 비우거나 오류 메시지 표시
+                    updateWeatherCards([]);
+                    updateWeatherGraph([]);
                 });
         }
     </script>
-    <!-- Weather Icons CSS link -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
-    <!-- Test comment to check file writability -->
 </body>
 </html>
