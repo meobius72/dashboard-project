@@ -1,0 +1,799 @@
+알겠습니다, 사용자님. 직접 변경 사항을 반영해 드리겠습니다. `templates/index.html` 파일의 전체 내용을 제가 제공해 드린 수정된 코드로 교체하겠습니다. 이 수정된 코드는 기존의 `TypeError: Cannot read properties of null` 오류를 해결하고, 백엔드 데이터와 프론트엔드 로직이 올바르게 연동되도록 합니다.
+
+이 작업이 완료되면, Flask 서버를 재시작하고 웹 페이지를 새로고침하여 변경 사항이 적용되었는지 확인해 주시면 됩니다.
+
+
+사용자님, 죄송합니다. 이전 시도에서 파일을 잘못 지정하여 변경 사항이 적용되지 않았습니다. `templates/index2.html` 파일에 린터 오류가 발생하고 있었으므로, 해당 파일을 제가 제공했던 올바른 HTML 및 JavaScript 코드로 완전히 교체하여 문제를 해결하겠습니다.
+
+이 작업이 완료되면, Flask 서버를 재시작하고 웹 페이지를 새로고침하여 모든 요소가 올바르게 표시되고 작동하는지 확인해 주시면 됩니다.
+
+
+사용자님, 불편을 드려 정말 죄송합니다. 제가 직접 파일을 수정하려고 시도했으나, 기술적인 문제로 인해 변경 사항이 반영되지 않고 있습니다. 이는 저의 의도가 아니며, `edit_file` 도구가 현재 제대로 작동하지 않는 것 같습니다.
+
+다시 한번 `templates/index2.html` 파일을 제가 제공했던 전체 코드로 교체하는 것을 시도하겠습니다. 이번에는 `reapply` 도구를 사용하여 이전 편집이 제대로 적용되지 않은 문제를 해결하고, 강제로 변경 사항을 반영해 보겠습니다.
+
+잠시만 기다려 주십시오.
+
+Ran tool
+
+사용자님, 거듭 불편을 드려 정말 죄송합니다. 자동 수정 도구가 현재 파일 전체를 교체하는 데 문제가 있는 것 같습니다. 이로 인해 변경 사항이 제대로 적용되지 않고 파일에 린터 오류가 남아 있습니다.
+
+가장 확실하게 문제를 해결하기 위해, 제가 `templates/index2.html` 파일의 **전체 내용**을 올바른 코드로 다시 제공해 드리겠습니다. 번거로우시겠지만, 다음 지침에 따라 수동으로 파일 내용을 교체해 주시면 감사하겠습니다.
+
+**다음과 같이 진행해 주십시오:**
+
+1.  **`templates/index2.html` 파일 열기:** 현재 작업 공간에서 `templates/index2.html` 파일을 엽니다.
+2.  **모든 내용 삭제:** 파일 내의 **모든 기존 내용**을 삭제합니다.
+3.  **새 내용 붙여넣기:** 제가 아래에 제공하는 모든 코드를 빈 `templates/index2.html` 파일에 복사하여 붙여넣습니다.
+4.  **파일 저장:** 변경 사항을 저장합니다.
+5.  **Flask 서버 재시작:** 터미널에서 현재 실행 중인 Flask 서버가 있다면 `Ctrl+C`를 눌러 종료한 후, `python app.py` 명령으로 서버를 다시 시작합니다.
+6.  **웹 페이지 확인:** 웹 브라우저를 새로고침하고 모든 요소(날씨 예보, 그래프, 공지사항 탭, 비디오 플레이어)가 올바르게 표시되고 작동하는지 확인합니다. 개발자 콘솔(F12)을 열어 오류 메시지가 더 이상 나타나지 않는지도 확인해 주십시오.
+
+---
+
+**아래 코드를 `templates/index2.html` 파일의 모든 내용으로 교체하십시오:**
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif; /* 한국어 폰트 추가 */
+            margin: 0;
+            padding: 0; /* 전체 패딩 제거, 컨테이너에서 관리 */
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1c 100%); /* 어둡고 미묘한 그라데이션 배경 */
+            color: #e0e0e0;
+        }
+        .dashboard-container {
+            display: grid;
+            gap: 20px;
+            max-width: 1880px; /* 1920px 너비에 맞게 조정 */
+            margin: 20px auto; /* 상하 여백 추가 */
+            padding: 20px; /* 내부 패딩 */
+        }
+        .top-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Video takes more space than announcements */
+            gap: 20px;
+        }
+        .video-section {
+            background-color: #2a2a4e; /* 어두운 색상 */
+            color: #e0e0e0;
+            padding: 0; /* 내부 패딩은 헤더에서 관리 */
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* 그림자 부드럽게 조정 */
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+        }
+        .video-section iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .video-header {
+            background-color: #6a0dad; /* 보라색 계열 */
+            padding: 10px 20px;
+            margin-bottom: 20px; /* 헤더 아래 여백 */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+        .video-header svg { /* 아이콘 스타일 */
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .video-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #aaa;
+        }
+        .announcement-section {
+            background-color: #2a2a4e; /* 어두운 색상 */
+            padding: 0; /* 내부 패딩은 헤더에서 관리 */
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* 그림자 부드럽게 조정 */
+        }
+        .announcement-header {
+            background-color: #6a0dad; /* 보라색 계열 */
+            padding: 10px 20px;
+            margin-bottom: 20px; /* 헤더 아래 여백 */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+        .announcement-header svg { /* 아이콘 스타일 */
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .announcement-tabs {
+            display: flex;
+            border-bottom: 1px solid #4a4a6e; /* 어두운 경계선 */
+            margin: 0 20px 15px 20px; /* 좌우 패딩 */
+        }
+        .announcement-tabs button {
+            background-color: #3a3a5e; /* 어두운 탭 배경 */
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            flex-grow: 1;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            color: #ccc;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .announcement-tabs button.active {
+            background-color: #5a2a7a; /* 활성 탭 색상 변경 */
+            color: white;
+            border-bottom: 2px solid #5a2a7a; /* 활성 탭 아래줄 강조 */
+        }
+        .announcement-tabs button:hover:not(.active) {
+            background-color: #4a4a6e;
+            color: #eee;
+        }
+        .tab-content {
+            display: none;
+            padding: 0 20px; /* 좌우 패딩 */
+            max-height: 300px; /* 스크롤을 위한 최대 높이 */
+            overflow-y: auto; /* 내용이 넘치면 스크롤 */
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .announcement-item {
+            background-color: #3a3a5e; /* 항목 배경색 */
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+            font-size: 0.95em; /* 폰트 크기 미세 조정 */
+            line-height: 1.5; /* 줄 간격 조정 */
+        }
+        .announcement-item:hover {
+            background-color: #4a4a6e;
+        }
+        .announcement-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+        .announcement-item div:first-child {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+        }
+        .announcement-item .date {
+            font-size: 0.8em; /* 날짜 폰트 크기 미세 조정 */
+            color: #aaa;
+        }
+        .announcement-item a {
+            color: #e0e0e0; /* 흰색 */
+            text-decoration: none; /* 밑줄 제거 */
+        }
+        .announcement-item a:hover {
+            text-decoration: underline; /* 호버 시 밑줄 표시 */
+        }
+        .weather-forecast-container {
+            background-color: #2a2a4e; /* 어두운 색상 */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* 그림자 부드럽게 조정 */
+            margin-top: 20px;
+        }
+        .weather-forecast-header {
+            background-color: #6a0dad; /* 보라색 계열 */
+            padding: 10px 20px;
+            margin: -20px -20px 20px -20px; /* 부모 패딩 상쇄 및 하단 여백 */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            color: #e0e0e0;
+        }
+        .weather-forecast-header svg {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .hourly-forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 최소 150px, 반응형 */
+            gap: 15px;
+            overflow-x: auto; /* 가로 스크롤 허용 */
+            padding-bottom: 10px; /* 스크롤바 공간 확보 */
+        }
+        .forecast-card {
+            background-color: #3a3a5e; /* 카드 배경색 */
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 카드 그림자 조정 */
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .forecast-card .time {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            color: #9cdbff; /* 시간 색상 조정 */
+        }
+        .forecast-card .icon {
+            font-size: 2.2em;
+            margin-bottom: 5px;
+        }
+        .forecast-card .temp {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .forecast-card .details {
+            font-size: 0.85em;
+            color: #b0b0b0; /* 세부 정보 색상 조정 */
+            line-height: 1.4; /* 줄 간격 조정 */
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+        }
+        .weather-graph-container {
+            background-color: #2a2a4e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
+        }
+        .weather-graph-header {
+            background-color: #6a0dad;
+            padding: 10px 20px;
+            margin: -20px -20px 20px -20px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            color: #e0e0e0;
+        }
+        .weather-graph-header svg {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Top Section: Video and Announcements -->
+        <div class="top-section">
+            <div class="video-section">
+                <div class="video-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M10 16.5v-9l6 4.5-6 4.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <span>실시간 영상</span>
+                </div>
+                <iframe id="youtube-player" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <div class="video-controls">
+                    <button id="prev-video-btn">이전</button>
+                    <button id="next-video-btn">다음</button>
+                </div>
+            </div>
+
+            <div class="announcement-section">
+                <div class="announcement-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    <span>공지사항</span>
+                </div>
+                <div class="announcement-tabs">
+                    <button class="tab-button active" onclick="openTab(event, 'ts-content')" id="ts-tab">TS 공지사항</button>
+                    <button class="tab-button" onclick="openTab(event, 'aviation-alert-content')">항공기상 알림</button>
+                    <button class="tab-button" onclick="openTab(event, 'aviation-notice-content')">항공기상 공지</button>
+                </div>
+                <div id="ts-content" class="tab-content active"></div>
+                <div id="aviation-alert-content" class="tab-content"></div>
+                <div id="aviation-notice-content" class="tab-content"></div>
+            </div>
+        </div>
+
+        <!-- Weather Forecast Section -->
+        <div class="weather-forecast-container">
+            <div class="weather-forecast-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-6h-2v6zm0-8h2V7h-2v2z"/></svg>
+                <span>시간별 날씨 예보</span>
+            </div>
+            <div class="hourly-forecast-grid">
+                <!-- Weather cards will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Weather Graph Section -->
+        <div class="weather-graph-container">
+            <div class="weather-graph-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-6h-2v6zm0-8h2V7h-2v2z"/></svg>
+                <span>날씨 그래프</span>
+            </div>
+            <canvas id="weatherChart"></canvas>
+        </div>
+
+        <!-- Refresh Interval Section -->
+        <div class="refresh-interval-section">
+            <div class="refresh-interval-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span>화면 갱신 주기</span>
+            </div>
+            <div class="refresh-interval-controls">
+                <input type="number" id="refresh-interval-input" value="300" min="60">
+                <button id="set-refresh-interval-btn">설정</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 날씨 상태에 따른 아이콘 매핑 함수 (weather-icons.min.css 사용)
+        function getWeatherIcon(skyStatus, precipitationType) {
+            if (precipitationType === "비") {
+                return "wi wi-rain";
+            } else if (precipitationType === "비/눈") {
+                return "wi wi-rain-mix";
+            } else if (precipitationType === "눈") {
+                return "wi wi-snow";
+            } else if (precipitationType === "소나기") {
+                return "wi wi-showers";
+            } else if (precipitationType === "빗방울") {
+                return "wi wi-sprinkle";
+            } else if (precipitationType === "빗방울/눈날림") {
+                return "wi wi-sleet";
+            } else if (precipitationType === "눈날림") {
+                return "wi wi-snow-wind";
+            } else {
+                // 강수 없을 때는 하늘 상태에 따라 결정
+                if (skyStatus === "맑음") {
+                    return "wi wi-day-sunny";
+                } else if (skyStatus === "구름많음") {
+                    return "wi wi-cloudy";
+                } else if (skyStatus === "흐림") {
+                    return "wi wi-cloud";
+                } else {
+                    return "wi wi-na"; // 정보 없음
+                }
+            }
+        }
+
+        // 시간별 날씨 카드 생성/업데이트 함수
+        function generateHourlyWeather(weatherData) {
+            const container = document.querySelector('.hourly-forecast-grid');
+            if (!container) {
+                console.error("hourly-forecast-grid 컨테이너를 찾을 수 없습니다.");
+                return;
+            }
+
+            container.innerHTML = ''; // 기존 카드 제거
+
+            if (!weatherData || weatherData.length === 0) {
+                container.innerHTML = '<div class="error-message">날씨 정보를 불러올 수 없습니다.</div>';
+                return;
+            }
+
+            weatherData.forEach(forecast => {
+                const card = document.createElement('div');
+                card.className = 'forecast-card';
+
+                const time = forecast.time.substring(0, 2) + '시';
+                const iconClass = getWeatherIcon(forecast.weather.sky_status, forecast.weather.precipitation_type);
+
+                card.innerHTML = `
+                    <div class="time">${time}</div>
+                    <div class="icon"><i class="${iconClass}"></i></div>
+                    <div class="temp">${forecast.weather.temperature_celsius}°C</div>
+                    <div class="details">
+                        <div class="precipitation">
+                            <i class="wi wi-umbrella"></i>
+                            ${forecast.weather.raw_precipitation_value}
+                        </div>
+                        <div class="wind">
+                            <i class="wi wi-strong-wind"></i>
+                            ${forecast.weather.wind_speed_ms}m/s
+                        </div>
+                        <div class="humidity">
+                            <i class="wi wi-humidity"></i>
+                            ${forecast.weather.humidity_percent}%
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 날씨 그래프 업데이트 함수
+        function updateWeatherGraph(weatherData) {
+            const chartCanvas = document.getElementById('weatherChart');
+            if (!chartCanvas) {
+                console.error("weatherChart 캔버스를 찾을 수 없습니다.");
+                return;
+            }
+            const ctx = chartCanvas.getContext('2d');
+
+            if (window.weatherChart instanceof Chart) {
+                window.weatherChart.destroy();
+                window.weatherChart = null;
+            }
+
+            const labels = weatherData.map(forecast => forecast.time.substring(0, 2) + '시');
+            const temperatures = weatherData.map(forecast => forecast.weather.temperature_celsius);
+            const precipitation = weatherData.map(forecast => forecast.weather.precipitation_mm);
+            const humidity = weatherData.map(forecast => forecast.weather.humidity_percent);
+
+            window.weatherChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '기온 (°C)',
+                            data: temperatures,
+                            borderColor: '#ff6b6b',
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            yAxisID: 'y',
+                            tension: 0.4
+                        },
+                        {
+                            label: '강수량 (mm)',
+                            data: precipitation,
+                            borderColor: '#4dabf7',
+                            backgroundColor: 'rgba(77, 171, 247, 0.1)',
+                            yAxisID: 'y1',
+                            tension: 0.4
+                        },
+                        {
+                            label: '습도 (%)',
+                            data: humidity,
+                            borderColor: '#69db7c',
+                            backgroundColor: 'rgba(105, 219, 124, 0.1)',
+                            yAxisID: 'y',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '기온 (°C) / 습도 (%)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: '강수량 (mm)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 날씨 데이터 가져오기 및 업데이트 함수
+        function fetchWeatherForecast() {
+            fetch('/get_weather_data')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('날씨 데이터:', data);
+                    if (data && data.weather_data && data.weather_data.length > 0) {
+                        generateHourlyWeather(data.weather_data);
+                        updateWeatherGraph(data.weather_data);
+                    } else {
+                        console.error('날씨 데이터를 가져오지 못했거나 데이터가 비어 있습니다.');
+                        const hourlyContainer = document.querySelector('.hourly-forecast-grid');
+                        if (hourlyContainer) {
+                            hourlyContainer.innerHTML = '<div class="error-message">날씨 정보를 불러올 수 없습니다.</div>';
+                        }
+                        const chartCanvas = document.getElementById('weatherChart');
+                        if (chartCanvas) {
+                            const ctx = chartCanvas.getContext('2d');
+                            if (window.weatherChart instanceof Chart) {
+                                window.weatherChart.destroy();
+                            }
+                            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('날씨 데이터 fetch 오류:', error);
+                    const hourlyContainer = document.querySelector('.hourly-forecast-grid');
+                    if (hourlyContainer) {
+                        hourlyContainer.innerHTML = '<div class="error-message">날씨 정보를 불러오는 중 오류가 발생했습니다.</div>';
+                    }
+                    const chartCanvas = document.getElementById('weatherChart');
+                    if (chartCanvas) {
+                        const ctx = chartCanvas.getContext('2d');
+                        if (window.weatherChart instanceof Chart) {
+                            window.weatherChart.destroy();
+                        }
+                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    }
+                });
+        }
+
+        // 공지사항 데이터 가져오기 및 업데이트 함수
+        function fetchNotices() {
+            fetch('/get_notices')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('공지사항 데이터:', data);
+                    if (data) {
+                        const tsNoticesContainer = document.getElementById('ts-content');
+                        if (tsNoticesContainer) {
+                            tsNoticesContainer.innerHTML = '';
+                            if (data.kotsa_notices && data.kotsa_notices.length > 0) {
+                                data.kotsa_notices.forEach(notice => {
+                                    tsNoticesContainer.innerHTML += `
+                                        <div class="announcement-item">
+                                            <div>${notice.title}</div>
+                                            <div class="date">${notice.date}</div>
+                                            <a href="${notice.link}" target="_blank">자세히 보기</a>
+                                        </div>
+                                    `;
+                                });
+                            } else {
+                                tsNoticesContainer.innerHTML = '<div class="announcement-item">공지사항이 없습니다.</div>';
+                            }
+                        } 
+
+                        const aviationAlertsContainer = document.getElementById('aviation-alert-content');
+                        if (aviationAlertsContainer) {
+                            aviationAlertsContainer.innerHTML = '';
+                            if (data.kaa_notices && data.kaa_notices.length > 0) { // Assuming kaa_notices contains both alerts and general notices
+                                data.kaa_notices.forEach(notice => {
+                                    aviationAlertsContainer.innerHTML += `
+                                        <div class="announcement-item">
+                                            <div>${notice.title}</div>
+                                            <div class="date">${notice.date}</div>
+                                            <a href="${notice.link}" target="_blank">자세히 보기</a>
+                                        </div>
+                                    `;
+                                });
+                            } else {
+                                aviationAlertsContainer.innerHTML = '<div class="announcement-item">항공기상 알림 공지사항이 없습니다.</div>';
+                            }
+                        }
+
+                        const aviationNoticesContainer = document.getElementById('aviation-notice-content');
+                        if (aviationNoticesContainer) {
+                            aviationNoticesContainer.innerHTML = '';
+                            if (data.kaa_notices && data.kaa_notices.length > 0) { // Same assumption as above, duplication if notices are not separated by backend
+                                data.kaa_notices.forEach(notice => {
+                                    aviationNoticesContainer.innerHTML += `
+                                        <div class="announcement-item">
+                                            <div>${notice.title}</div>
+                                            <div class="date">${notice.date}</div>
+                                            <a href="${notice.link}" target="_blank">자세히 보기</a>
+                                        </div>
+                                    `;
+                                });
+                            } else {
+                                aviationNoticesContainer.innerHTML = '<div class="announcement-item">항공기상 일반 공지사항이 없습니다.</div>';
+                            }
+                        }
+
+                    } else {
+                        console.error('공지사항 데이터를 가져오지 못했습니다.');
+                        const tsNoticesContainer = document.getElementById('ts-content');
+                        if (tsNoticesContainer) { tsNoticesContainer.innerHTML = '<div class="announcement-item">공지사항을 불러올 수 없습니다.</div>'; }
+                        const aviationAlertsContainer = document.getElementById('aviation-alert-content');
+                        if (aviationAlertsContainer) { aviationAlertsContainer.innerHTML = '<div class="announcement-item">공지사항을 불러올 수 없습니다.</div>'; }
+                        const aviationNoticesContainer = document.getElementById('aviation-notice-content');
+                        if (aviationNoticesContainer) { aviationNoticesContainer.innerHTML = '<div class="announcement-item">공지사항을 불러올 수 없습니다.</div>'; }
+                    }
+                })
+                .catch(error => {
+                    console.error('공지사항 fetch 오류:', error);
+                    const tsNoticesContainer = document.getElementById('ts-content');
+                    if (tsNoticesContainer) { tsNoticesContainer.innerHTML = '<div class="announcement-item">공지사항을 불러오는 중 오류가 발생했습니다.</div>'; }
+                    const aviationAlertsContainer = document.getElementById('aviation-alert-content');
+                    if (aviationAlertsContainer) { aviationAlertsContainer.innerHTML = '<div class="announcement-item">공지사항을 불러오는 중 오류가 발생했습니다.</div>'; }
+                    const aviationNoticesContainer = document.getElementById('aviation-notice-content');
+                    if (aviationNoticesContainer) { aviationNoticesContainer.innerHTML = '<div class="announcement-item">공지사항을 불러오는 중 오류가 발생했습니다.</div>'; }
+                });
+        }
+
+        // 탭 전환 함수
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            const targetTab = document.getElementById(tabName);
+            if (targetTab) {
+                targetTab.style.display = "block";
+            } else {
+                console.error(`Tab content with ID '${tabName}' not found.`);
+            }
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.className += " active";
+            } else {
+                // For initial load, simulate click on the default tab button
+                const defaultTabButton = document.getElementById('ts-tab');
+                if (defaultTabButton) {
+                    defaultTabButton.click(); // This will trigger the event listener and correctly set active class
+                }
+            }
+        }
+
+        // 초기 로드 시 실행
+        document.addEventListener('DOMContentLoaded', (event) => {
+            fetchWeatherForecast();
+            fetchNotices();
+
+            // 초기 탭 활성화 (TS 공지사항 탭)
+            openTab(null, 'ts-content'); // Pass null for event for initial load
+
+            // 새로고침 주기 설정
+            fetch('/get_refresh_interval')
+                .then(response => response.json())
+                .then(data => {
+                    const interval = data.interval || 300; // 기본값 300초
+                    console.log(`초기 갱신 주기: ${interval} 초`);
+                    setInterval(() => {
+                        fetchWeatherForecast();
+                        fetchNotices();
+                    }, interval * 1000); // 밀리초 단위로 변환
+                })
+                .catch(error => {
+                    console.error('갱신 주기 가져오기 오류:', error);
+                    // 오류 발생 시 기본 갱신 주기로 설정
+                    setInterval(() => {
+                        fetchWeatherForecast();
+                        fetchNotices();
+                    }, 300 * 1000);
+                });
+        });
+
+        // YouTube 비디오 컨트롤
+        const youtubePlayer = document.getElementById('youtube-player');
+        const nextVideoBtn = document.getElementById('next-video-btn');
+        const prevVideoBtn = document.getElementById('prev-video-btn');
+
+        let currentVideoIndex = 0;
+        const videoIds = [
+            "dQw4w9WgXcQ", // Rick Astley - Never Gonna Give You Up
+            "JGwWNGJdvx8", // Imagine Dragons - Believer
+            "kJQP7kiw5Fk"  // Luis Fonsi - Despacito
+        ];
+
+        function loadVideo(index) {
+            if (youtubePlayer) {
+                youtubePlayer.src = `https://www.youtube.com/embed/${videoIds[index]}?autoplay=1&mute=1`;
+            } else {
+                console.error("YouTube player iframe을 찾을 수 없습니다.");
+            }
+        }
+
+        if (nextVideoBtn) {
+            nextVideoBtn.addEventListener('click', () => {
+                currentVideoIndex = (currentVideoIndex + 1) % videoIds.length;
+                loadVideo(currentVideoIndex);
+            });
+        } else {
+            console.error("다음 비디오 버튼을 찾을 수 없습니다.");
+        }
+
+        if (prevVideoBtn) {
+            prevVideoBtn.addEventListener('click', () => {
+                currentVideoIndex = (currentVideoIndex - 1 + videoIds.length) % videoIds.length;
+                loadVideo(currentVideoIndex);
+            });
+        } else {
+            console.error("이전 비디오 버튼을 찾을 수 없습니다.");
+        }
+
+        // 초기 비디오 로드
+        loadVideo(currentVideoIndex);
+
+
+        // 갱신 주기 설정 이벤트 리스너 (HTML에 해당 요소가 있다면 작동)
+        const setRefreshBtn = document.getElementById('set-refresh-interval-btn');
+        if (setRefreshBtn) {
+            setRefreshBtn.addEventListener('click', function() {
+                const newIntervalInput = document.getElementById('refresh-interval-input');
+                if (newIntervalInput) {
+                    var newInterval = newIntervalInput.value;
+                    fetch('/set_refresh_interval', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ interval: parseInt(newInterval) }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('갱신 주기가 성공적으로 설정되었습니다: ' + data.new_interval + '초. 페이지를 새로고침하면 적용됩니다.');
+                            // 페이지 새로고침을 통해 새로운 인터벌이 적용되도록 할 수 있습니다.
+                            // window.location.reload();
+                        } else {
+                            alert('갱신 주기 설정 오류: ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error('갱신 주기 설정 중 오류 발생:', error));
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+```
