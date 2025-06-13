@@ -301,155 +301,185 @@
         </div>
 
         <div class="weather-section">
-            <div class="weather-header">
-                <div class="location">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
-                    <span>경기기계공업고등학교</span>
-                </div>
-                <div>2025년 6월 12일 목요일</div>
-                <div>최종 업데이트 오전 10:34</div>
+            <h2>하계동 날씨 정보</h2>
+            <div id="weather-data" class="weather-info">
+                {% if weather_data.error %}
+                    <p class="error">오류: {{ weather_data.error }}</p>
+                {% elif weather_data.temperature %}
+                    <p>기온: <span id="current-temp">{{ weather_data.temperature }}</span></p>
+                    <p>습도: <span id="current-humi">{{ weather_data.humidity }}</span></p>
+                    <p>강수량: <span id="current-rain">{{ weather_data.rainfall }}</span></p>
+                    <p>풍속: <span id="current-wind-speed">{{ weather_data.wind_speed }}</span></p>
+                    <p>풍향: <span id="current-wind-direction">{{ weather_data.wind_direction }}</span></p>
+                    <p>강수형태: <span id="current-precipitation-type">{{ weather_data.precipitation_type }}</span></p>
+                {% else %}
+                    <p>날씨 정보 로딩 중...</p>
+                {% endif %}
             </div>
-            <div class="weather-cards-container">
-                <div class="weather-card">
-                    <div class="time">07:00</div>
-                    <div class="icon">☀️</div>
-                    <div class="temp">18℃</div>
-                    <div class="details">강수 10%<br>바람 2.3m/s</div>
-                </div>
-                <div class="weather-card">
-                    <div class="time">10:00</div>
-                    <div class="icon">☁️</div>
-                    <div class="temp">22℃</div>
-                    <div class="details">강수 20%<br>바람 1.8m/s</div>
-                </div>
-                <div class="weather-card">
-                    <div class="time">13:00</div>
-                    <div class="icon">🌧️</div>
-                    <div class="temp">25℃</div>
-                    <div class="details">강수 5%<br>바람 3.1m/s</div>
-                </div>
-                <div class="weather-card">
-                    <div class="time">16:00</div>
-                    <div class="icon">☔</div>
-                    <div class="temp">23℃</div>
-                    <div class="details">강수 65%<br>바람 4.2m/s</div>
-                </div>
-                <div class="weather-card">
-                    <div class="time">19:00</div>
-                    <div class="icon">❄️</div>
-                    <div class="temp">20℃</div>
-                    <div class="details">강수 30%<br>바람 2.7m/s</div>
-                </div>
-            </div>
-            <div id="weather-error-message" style="text-align: right; color: red; font-size: 0.9em; margin-top: 10px; display: none;">날씨 정보 수집 오류</div>
+        </div>
+
+        <div class="controls-section panel">
+            <h2>화면 갱신 주기 설정</h2>
+            <input type="number" id="refresh-interval-input" value="300" min="60" step="60">
+            <button id="set-refresh-interval-btn">설정</button>
         </div>
     </div>
 
+    <footer style="background-color: #333; color: white; text-align: center; padding: 10px 0; position: relative; bottom: 0; width: 100%;">
+        <p>&copy; 2023 통합 대시보드. 모든 권리 보유.</p>
+    </footer>
+
     <script>
-        function openTab(evt, tabName) {
-            var i, tabcontent, tabbuttons;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            tabbuttons = document.getElementsByClassName("tab-button");
-            for (i = 0; i < tabbuttons.length; i++) {
-                tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
-            }
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
+        var player;
+        var currentVideoId = '{{ current_video_id }}';
+        var refreshInterval = 300;
+        var refreshTimer;
 
-        // 초기 로드 시 첫 번째 탭 활성화
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelector(".tab-button").click();
-            updateWeatherDisplay(); // 날씨 정보 업데이트 함수 호출
-        });
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // 날씨 데이터를 가져오는 함수 (Flask 서버에서 실제 데이터 사용)
-        async function fetchWeatherData() {
-            try {
-                const response = await fetch('http://127.0.0.1:5000/weather');
-                if (!response.ok) {
-                    // HTTP 오류 발생 시, 오류 메시지를 포함하여 reject
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}. Response: ${errorText}`);
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '100%',
+                width: '100%',
+                videoId: currentVideoId,
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 1,
+                    'loop': 1,
+                    'playlist': currentVideoId,
+                    'mute': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
                 }
-                const data = await response.json();
-                // weather1.py의 출력 형태인 TM_EF_STR, WF, SKY, TA, ST, WS를 가정
-                return data.map(item => ({
-                    TM_EF: item.TM_EF_STR, // Flask에서 TM_EF_STR로 반환되도록 변경
-                    WF: item.WF,
-                    SKY: item.SKY,
-                    TA: item.TA,
-                    ST: item.ST,
-                    WS: item.WS
-                }));
-            } catch (error) {
-                console.error('날씨 데이터를 가져오는 중 오류 발생:', error);
-                document.getElementById('weather-error-message').style.display = 'block'; // 오류 메시지 표시
-                return []; // 오류 발생 시 빈 배열 반환
+            });
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+            startRefreshTimer();
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                // playNextVideo();
             }
         }
 
-        // 날씨 아이콘 매핑
-        const skyCodes = {
-            'DB01': '☀️', // 맑음
-            'DB02': '⛅', // 구름조금
-            'DB03': '☁️', // 구름많음
-            'DB04': '🌧️'  // 흐림 (비/눈도 포함)
-        };
-        const weatherIcons = {
-            '맑음': '☀️',
-            '구름조금': '⛅',
-            '구름많음': '☁️',
-            '흐림': '☁️',
-            '비': '☔',
-            '눈': '❄️'
-        };
-
-
-        // 날씨 정보를 HTML에 업데이트하는 함수
-        async function updateWeatherDisplay() {
-            document.getElementById('weather-error-message').style.display = 'none'; // 초기화 시 오류 메시지 숨김
-            const forecastData = await fetchWeatherData();
-            const weatherCardsContainer = document.querySelector('.weather-cards-container');
-            
-            if (forecastData && forecastData.length > 0) {
-                weatherCardsContainer.innerHTML = ''; // 기존 카드 초기화
-                forecastData.forEach(row => {
-                    const dt_obj = new Date(row.TM_EF.substring(0, 4), row.TM_EF.substring(4, 6) - 1, row.TM_EF.substring(6, 8), row.TM_EF.substring(8, 10), row.TM_EF.substring(10, 12));
-                    const timeText = dt_obj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    const skyStatus = skyCodes[row.SKY] || weatherIcons[row.WF] || '❓'; // SKY 코드 또는 WF에 따른 아이콘
-
-                    const weatherCard = `
-                        <div class="weather-card">
-                            <div class="time">${timeText}</div>
-                            <div class="icon">${skyStatus}</div>
-                            <div class="temp">${row.TA}℃</div>
-                            <div class="details">강수 ${row.ST}%<br>바람 ${row.WS}m/s</div>
-                        </div>
-                    `;
-                    weatherCardsContainer.innerHTML += weatherCard;
-                });
-            } else {
-                // 데이터가 없을 때, 기존 카드(플레이스홀더)를 지우지 않음. 
-                // 대신, 이미 `fetchWeatherData`에서 오류 메시지를 표시했으므로 여기서는 추가 작업 없이 종료.
-                // 처음 로드 시 기본 카드(플레이스홀더)가 HTML에 이미 있으므로.
-                console.log("날씨 데이터 없음 또는 오류 발생. 기존 날씨 카드 유지.");
-            }
-            
-            // 현재 날짜 및 업데이트 시간 업데이트
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
-            const day = now.getDate();
-            const dayOfWeek = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'][now.getDay()];
-            const updateTime = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
-
-            document.querySelector('.weather-header > div:nth-child(2)').textContent = `${year}년 ${month}월 ${day}일 ${dayOfWeek}`;
-            document.querySelector('.weather-header > div:nth-child(3)').textContent = `최종 업데이트 ${updateTime}`;
+        function playNextVideo() {
+            fetch('/next_video')
+                .then(response => response.json())
+                .then(data => {
+                    player.loadVideoById(data.video_id);
+                    currentVideoId = data.video_id;
+                })
+                .catch(error => console.error('다음 동영상 로드 오류:', error));
         }
+
+        function playPreviousVideo() {
+            fetch('/prev_video')
+                .then(response => response.json())
+                .then(data => {
+                    player.loadVideoById(data.video_id);
+                    currentVideoId = data.video_id;
+                })
+                .catch(error => console.error('이전 동영상 로드 오류:', error));
+        }
+
+        function updateDashboardData() {
+            console.log('updateDashboardData 함수 호출됨');
+            // 공지사항 갱신
+            fetch('/get_notices')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && !data.error) {
+                        var kotsaNoticesHtml = '';
+                        data.kotsa_notices.forEach(function(notice) {
+                            kotsaNoticesHtml += `<li><a href="https://lic.kotsa.or.kr/tsportal/board/view.do?manage_idx=10&menu_idx=9&board_idx=${notice.link_id}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
+                        });
+                        document.getElementById('kotsa-notices').innerHTML = `<ul>${kotsaNoticesHtml}</ul>`;
+
+                        var kaaAlarmNoticesHtml = '';
+                        data.kaa_notices.alarm_notices.forEach(function(notice) {
+                            kaaAlarmNoticesHtml += `<li><a href="https://www.kaa.atims.kr/pubs/notice/notice/ViewAction.do?noti_idx=${notice.link_id}" target="_blank">[알림] ${notice.title}</a> <span class="date">${notice.date}</span></li>`;
+                        });
+                        document.getElementById('kaa-alarm-notices').innerHTML = `<ul>${kaaAlarmNoticesHtml}</ul>`;
+
+                        var kaaNumberedNoticesHtml = '';
+                        data.kaa_notices.numbered_notices.forEach(function(notice) {
+                            kaaNumberedNoticesHtml += `<li><a href="https://www.kaa.atims.kr/pubs/notice/notice/ViewAction.do?noti_idx=${notice.link_id}" target="_blank">${notice.title}</a> <span class="date">${notice.date}</span></li>`;
+                        });
+                        document.getElementById('kaa-numbered-notices').innerHTML = `<ul>${kaaNumberedNoticesHtml}</ul>`;
+
+                    } else if (data && data.error) {
+                        document.getElementById('kotsa-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
+                        document.getElementById('kaa-alarm-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
+                        document.getElementById('kaa-numbered-notices').innerHTML = `<ul><li>${data.error}</li></ul>`;
+                    }
+                })
+                .catch(error => console.error('공지사항 갱신 오류:', error));
+
+            // 날씨 정보는 Flask 서버에서 직접 전달하므로, 여기서는 갱신하지 않음
+        }
+
+        function startRefreshTimer() {
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+            }
+            refreshTimer = setInterval(updateDashboardData, refreshInterval * 1000);
+            console.log('대시보드 갱신 주기가 ' + refreshInterval + '초로 설정되었습니다.');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 해상도 표시 (주석 처리됨)
+            /*
+            const resolutionDisplay = document.getElementById('resolution-display');
+            if (resolutionDisplay) {
+                const screenWidth = window.screen.width;
+                const screenHeight = window.screen.height;
+                resolutionDisplay.textContent = `화면 해상도: ${screenWidth}x${screenHeight}`;
+            }
+            */
+
+            fetch('/get_refresh_interval')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.interval) {
+                        refreshInterval = data.interval;
+                        document.getElementById('refresh-interval-input').value = refreshInterval;
+                        console.log('초기 갱신 주기: ' + refreshInterval + '초');
+                    }
+                })
+                .catch(error => console.error('갱신 주기 가져오기 오류:', error));
+
+            updateDashboardData(); // 초기 공지사항 로드
+
+            document.getElementById('set-refresh-interval-btn').addEventListener('click', function() {
+                var newInterval = document.getElementById('refresh-interval-input').value;
+                fetch('/set_refresh_interval', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ interval: parseInt(newInterval) }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        refreshInterval = data.new_interval;
+                        startRefreshTimer();
+                        alert('갱신 주기가 성공적으로 설정되었습니다: ' + refreshInterval + '초');
+                    } else {
+                        alert('갱신 주기 설정 오류: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('갱신 주기 설정 중 오류 발생:', error));
+            });
+        });
     </script>
 </body>
 </html> 
