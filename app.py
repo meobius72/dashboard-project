@@ -1,5 +1,5 @@
 import requests
-import math
+# import math # math 모듈은 현재 사용되지 않으므로 제거합니다.
 from flask import Flask, render_template, jsonify, request
 from scrape_notices import scrape_kotsa_notices, scrape_kaa_notices
 from datetime import datetime, timedelta, timezone
@@ -34,7 +34,7 @@ REFRESH_INTERVAL = 300
 DATABASE_FILE = 'weather_forecasts.db'
 
 # 기상청 API 설정
-WEATHER_API_KEY = "PcVFXfWoNUlki9AS6y8ODPyW2KZKyHfrGdy6rFnMUNIBZxhC2+KnUUekPDtfSBCRBWfR/G+9UpcQwuHBZFR+Xw==" # 디코딩된 인증키
+WEATHER_API_KEY = urllib.parse.quote_plus("PcVFXfWoNUlki9AS6y8ODPyW2KZKyHfrGdy6rFnMUNIBZxhC2+KnUUekPDtfSBCRBWfR/G+9UpcQwuHBZFR+Xw==") # 디코딩된 인증키를 URL 인코딩하여 사용
 WEATHER_API_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst"
 WEATHER_NX = "55"  # 경기기계공업고등학교 X좌표
 WEATHER_NY = "127"  # 경기기계공업고등학교 Y좌표

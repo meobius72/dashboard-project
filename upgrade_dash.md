@@ -79,4 +79,19 @@
 ### 에러 코드 처리
 - 00: 정상
 - 03: 데이터없음 에러 (발생 시 base_time 확인 필요)
-- 30: 등록되지 않은 서비스키 (최신 키 반영 및 승인 확인 필요) 
+- 30: 등록되지 않은 서비스키 (최신 키 반영 및 승인 확인 필요)
+
+## 날씨 정보 기능 업데이트 (getUltraSrtNcst 서비스)
+
+### 2025년 06월 13일 (추가 업데이트)
+
+*   **API 키 활용 승인 및 URL 인코딩 확인:** 사용자께서 제공해주신 스크린샷을 통해 API 키 (`PcVFXfWoNUlki9AS6y8ODPyW2KZKyHfrGdy6rFnMUNIBZxhC2+KnUUekPDtfSBCRBWfR/G+9UpcQwuHBZFR+Xw==`)가 '기상청_단기예보 ((구)_동네예보) 조회서비스'의 '초단기실황조회 (getUltraSrtNcst)' 기능에 대해 **활용 승인이 완료된 유효한 키임**을 확인했습니다.
+*   **`app.py` 수정:**
+    *   `WEATHER_API_KEY`에 `urllib.parse.quote_plus()`를 사용하여 API 키가 URL 인코딩되도록 적용했습니다. (예: `PcVFXfWoNUlki9AS6y8ODPyW2KZKyHfrGdy6rFnMUNIBZxhC2%2BKnUUekPDtfSBCRBWfR%2FG%2B9UpcQwuHBZFR%2BXw%3D%3D`)
+    *   불필요한 `math` 모듈 임포트를 제거했습니다.
+*   **잔여 오류 원인 분석 및 해결 방안:**
+    *   기존 터미널 출력에서 계속 발생했던 `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`는 API 키 자체의 문제라기보다는 **이전 Flask 프로세스의 잔여** 또는 **브라우저 캐시** 문제로 인해 오래된 설정이 로드되었을 가능성이 높습니다.
+    *   `app.py` 및 `templates/index.html`에서 이전 API 호출 로직을 직접 제거했음에도 불구하고 `fct_shrt_reg.php` 또는 `/weather` 라우트 오류가 발생하는 것 역시 **이전 Flask 프로세스 잔여** 또는 **브라우저 캐시** 문제로 판단됩니다.
+*   **사용자 지시사항:**
+    *   **모든 Flask 프로세스를 강제 종료**하고 재시작하도록 안내했습니다.
+    *   **웹 브라우저의 캐시를 지우거나 시크릿 모드로 접속**하여 테스트하도록 안내했습니다. 
