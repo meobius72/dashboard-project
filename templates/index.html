@@ -178,9 +178,9 @@
         }
         .hourly-forecast-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 최소 150px, 반응형 */
+            grid-template-columns: repeat(10, 1fr); /* 10개의 카드를 가로로 균등하게 배치 */
             gap: 15px;
-            overflow-x: auto; /* 가로 스크롤 허용 */
+            overflow-x: auto; /* 가로 스크롤 허용 (필요시) */
             padding-bottom: 10px; /* 스크롤바 공간 확보 */
         }
         .forecast-card {
@@ -221,8 +221,20 @@
             text-align: center;
             padding: 20px;
         }
+        /* 날씨 아이콘 추가를 위한 스타일 */
+        .weather-icon {
+            font-size: 2.5em; /* 아이콘 크기 조정 */
+            margin-bottom: 5px;
+        }
+        .forecast-card .pop {
+            font-size: 0.85em;
+            color: #87ceeb; /* 강수확률 색상 조정 */
+            margin-top: 5px;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <!-- 날씨 아이콘을 위한 Font Awesome 추가 (필요시) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="dashboard-container">
@@ -303,25 +315,7 @@
             </div>
             <div class="hourly-forecast-grid" id="weather-forecast-grid">
                 <!-- 날씨 예측 데이터가 여기에 동적으로 로드됩니다. -->
-                {% if weather_data and weather_data.forecasts %}
-                    {% for forecast in weather_data.forecasts %}
-                    <div class="forecast-card">
-                        <div class="time">{{ forecast.forecast_time[11:13] }}시</div>
-                        <div class="icon">
-                            <!-- 날씨 상태에 따른 아이콘 (예: 맑음, 흐림, 비, 눈 등) -->
-                            <i class="wi" id="weather-icon-{{ loop.index0 }}"></i>
-                        </div>
-                        <div class="temp">{{ "%.1f" | format(forecast.weather.temperature_celsius) }}°C</div>
-                        <div class="details">
-                            강수: {{ forecast.weather.precipitation_type }} ({{ "%.1f" | format(forecast.weather.precipitation_mm) }}mm)<br/>
-                            바람: {{ "%.1f" | format(forecast.weather.wind_speed_ms) }}m/s<br/>
-                            습도: {{ "%.0f" | format(forecast.weather.humidity_percent) }}%
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="error-message" id="weather-error-message">날씨 정보를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
-                {% endif %}
+                <p class="error-message" id="weather-error-message">날씨 정보를 불러오는 중...</p>
             </div>
         </div>
 
@@ -425,7 +419,7 @@
                 })
                 .catch(error => console.error('공지사항 갱신 오류:', error));
 
-            // 날씨 정보는 Flask 서버에서 직접 전달하므로, 여기서는 갱신하지 않음
+            fetchWeatherForecast(); // 날씨 정보 갱신
         }
 
         function startRefreshTimer() {
@@ -458,7 +452,7 @@
                 })
                 .catch(error => console.error('갱신 주기 가져오기 오류:', error));
 
-            updateDashboardData(); // 초기 공지사항 로드
+            updateDashboardData(); // 초기 공지사항 및 날씨 데이터 로드
 
             document.getElementById('set-refresh-interval-btn').addEventListener('click', function() {
                 var newInterval = document.getElementById('refresh-interval-input').value;
@@ -483,11 +477,11 @@
             });
 
             openTab(null, 'tsNotice');
-            fetchWeatherForecast(); // 초기 날씨 데이터 로드
+            // fetchWeatherForecast(); // 초기 날씨 데이터 로드는 updateDashboardData()에서 처리
             fetchNotices(); // 초기 공지사항 데이터 로드
 
-            // 날씨 데이터 주기적으로 업데이트 (예: 5분마다)
-            setInterval(fetchWeatherForecast, 5 * 60 * 1000);
+            // 날씨 데이터 주기적으로 업데이트 (예: 5분마다) - updateDashboardData()가 이미 호출하므로 제거
+            // setInterval(fetchWeatherForecast, 5 * 60 * 1000);
             // 공지사항 데이터 주기적으로 업데이트 (예: 30분마다)
             setInterval(fetchNotices, 30 * 60 * 1000);
         });
@@ -509,22 +503,28 @@
         }
 
         // 날씨 아이콘 매핑 함수
-        function getWeatherIcon(pty, sky) {
-            // 강수 형태(PTY) 우선
-            if (pty === 1) return "wi-rain"; // 비
-            if (pty === 2) return "wi-sleet"; // 비/눈
-            if (pty === 3) return "wi-snow"; // 눈
-            if (pty === 4) return "wi-thunderstorm"; // 소나기
-            if (pty === 5) return "wi-rain-mix"; // 빗방울
-            if (pty === 6) return "wi-rain-mix"; // 빗방울눈날림
-            if (pty === 7) return "wi-snow"; // 눈날림
+        function getWeatherIcon(sky, pty) {
+            // SKY (하늘 상태): 1(맑음), 3(구름많음), 4(흐림)
+            // PTY (강수 형태): 0(없음), 1(비), 2(비/눈), 3(눈), 5(빗방울), 6(빗방울눈날림), 7(눈날림)
 
-            // 하늘 상태(SKY)
-            if (sky === 1) return "wi-day-sunny"; // 맑음
-            if (sky === 3) return "wi-cloudy"; // 구름많음
-            if (sky === 4) return "wi-cloudy"; // 흐림
-
-            return "wi-na"; // 정보 없음 (Not Available)
+            if (pty !== 0) { // 강수 형태가 있으면 강수 아이콘 우선
+                switch (pty) {
+                    case 1: return 'fas fa-cloud-showers-heavy'; // 비
+                    case 2: return 'fas fa-cloud-sleet';     // 비/눈
+                    case 3: return 'fas fa-cloud-snow';      // 눈
+                    case 5: return 'fas fa-cloud-rain';       // 빗방울
+                    case 6: return 'fas fa-cloud-meatball';   // 빗방울눈날림 (적절한 아이콘이 없어 비슷한 것으로 대체)
+                    case 7: return 'fas fa-snowflake';        // 눈날림
+                    default: return 'fas fa-cloud-sun-rain'; // 기타 강수
+                }
+            } else { // 강수 형태가 없으면 하늘 상태 아이콘
+                switch (sky) {
+                    case 1: return 'fas fa-sun';           // 맑음
+                    case 3: return 'fas fa-cloud-sun';     // 구름많음
+                    case 4: return 'fas fa-cloud';         // 흐림
+                    default: return 'fas fa-cloud-meatball'; // 알 수 없음
+                }
+            }
         }
 
         // 날씨 상태 텍스트 매핑 함수 (옵션: 필요에 따라 사용)
@@ -549,37 +549,37 @@
             fetch('/get_weather_data')
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Weather data received:', data);
                     const weatherGrid = document.getElementById('weather-forecast-grid');
                     weatherGrid.innerHTML = ''; // 기존 내용 지우기
 
                     if (data.forecasts && data.forecasts.length > 0) {
                         data.forecasts.forEach((forecast, index) => {
+                            console.log('Processing forecast:', forecast);
+                            console.log('Precipitation probability:', forecast.weather.precipitation_probability);
                             const forecastCard = document.createElement('div');
                             forecastCard.className = 'forecast-card';
 
                             // 시간 표시 포맷팅
                             const fcstTimeHour = forecast.forecast_time.substring(11, 13);
 
-                            const iconClass = getWeatherIcon(forecast.weather.precipitation_type_code, forecast.weather.sky_status_code); // PTY, SKY 원본 숫자값 사용
-                            const statusText = getWeatherStatusText(forecast.weather.precipitation_type_code, forecast.weather.sky_status_code); // PTY, SKY 원본 숫자값 사용
+                            const iconClass = getWeatherIcon(forecast.weather.sky_status_code, forecast.weather.precipitation_type_code); // 아이콘 클래스 가져오기
 
                             forecastCard.innerHTML = `
                                 <div class="time">${fcstTimeHour}시</div>
-                                <div class="icon"><i class="wi ${iconClass}"></i></div>
+                                <div class="weather-icon"><i class="${iconClass}"></i></div>
                                 <div class="temp">${forecast.weather.temperature_celsius}°C</div>
+                                <div class="pop">강수확률: ${forecast.weather.precipitation_probability}%</div>
                                 <div class="details">
-                                    강수: ${forecast.weather.precipitation_type} (${forecast.weather.precipitation_mm}mm)<br/>
-                                    바람: ${forecast.weather.wind_speed_ms}m/s<br/>
-                                    습도: ${forecast.weather.humidity_percent}%
+                                    강수량: ${forecast.weather.precipitation_mm}mm<br/>
+                                    습도: ${forecast.weather.humidity_percent}%<br/>
+                                    바람: ${forecast.weather.wind_speed_ms}m/s
                                 </div>
                             `;
                             weatherGrid.appendChild(forecastCard);
-                            // 디버깅: 콘솔에 각 카드의 아이콘 클래스와 시간 출력
-                            console.log(`Card ${index}: Time=${fcstTimeHour}, Icon=${iconClass}, Status=${statusText}`);
                         });
                         document.getElementById('weather-error-message').style.display = 'none';
                     } else {
-                        // 데이터가 없거나 오류 메시지가 있는 경우
                         const errorMessageElement = document.getElementById('weather-error-message');
                         if (errorMessageElement) {
                             errorMessageElement.textContent = `날씨 API 오류: ${data.message || '데이터를 불러올 수 없습니다.'}`;
@@ -654,7 +654,6 @@
         }
     </script>
     <!-- Weather Icons CSS link -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
-    <!-- Test comment to check file writability -->
+    
 </body>
 </html>

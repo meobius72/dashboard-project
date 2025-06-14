@@ -394,7 +394,7 @@ def get_base_date_time():
 
     return base_date, base_time
 
-def get_weather_data():
+def fetch_and_store_weather_data_from_api():
     try:
         # KST 기준으로 현재 시간 설정 (UTC+9)
         now_utc = datetime.now(timezone.utc)
@@ -425,7 +425,6 @@ def get_weather_data():
         response.raise_for_status() # HTTP 오류 발생 시 예외 발생
 
         print(f"Weather API Status Code: {response.status_code}")
-        print(f"Weather API Response Headers: {response.headers}")
         print(f"Weather API Raw Response Body: {response.text}")
 
         soup = BeautifulSoup(response.text, 'xml')
@@ -459,13 +458,6 @@ def get_weather_data():
                 }
             parsed_data[forecast_datetime_str]["weather"][category] = fcst_value
 
-        # get_weather_data는 원본 데이터만 반환 (필터링, 포맷팅은 get_latest_forecasts_from_db에서 담당)
-        location_info = {"latitude": None, "longitude": None, "grid_x": int(WEATHER_NX), "grid_y": int(WEATHER_NY)}
-        base_reference_time = f"{base_date[:4]}-{base_date[4:6]}-{base_date[6:]} {base_time[:2]}:{base_time[2:]}"
-
-        # formatted_forecasts 및 필터링 로직 제거
-        # 이 부분은 get_latest_forecasts_from_db에서 처리
-        # 현재 API 응답에서 파싱된 원본 데이터만 반환
         raw_forecasts = []
         for dt_str in sorted(parsed_data.keys()):
             raw_forecasts.append({
@@ -475,8 +467,8 @@ def get_weather_data():
             })
 
         return {
-            "location": location_info,
-            "base_reference_time": base_reference_time,
+            "location": {"latitude": None, "longitude": None, "grid_x": int(WEATHER_NX), "grid_y": int(WEATHER_NY)},
+            "base_reference_time": f"{base_date[:4]}-{base_date[4:6]}-{base_date[6:]} {base_time[:2]}:{base_time[2:]}",
             "forecasts": raw_forecasts, # 원본 예측 데이터 반환
             "message": "날씨 정보 조회 성공"
         }
@@ -488,17 +480,27 @@ def get_weather_data():
         print(f"[ERROR] 예상치 못한 오류 발생: {e}")
         return {"error": "예상치 못한 오류 발생", "message": str(e)}
 
+@app.route('/get_weather_data')
+def get_weather_data_route(): # 함수 이름 변경 (기존 get_weather_data와 충돌 방지)
+    # 데이터베이스에서 최신 날씨 정보를 가져와 반환
+    weather_data = get_latest_forecasts_from_db(WEATHER_NX, WEATHER_NY)
+    if weather_data:
+        return jsonify(weather_data)
+    else:
+        return jsonify({"error": "날씨 정보를 불러올 수 없습니다.", "message": "데이터베이스에 날씨 정보가 없거나 오류가 발생했습니다."}), 500
+
 if __name__ == '__main__':
     init_db()
     # 5분마다 날씨 데이터를 업데이트하는 스레드 시작
     def update_weather_data_periodically():
         while True:
             print("Updating weather data...")
-            weather_data = get_weather_data()
+            # 외부 API에서 데이터를 가져와 데이터베이스에 저장
+            weather_data = fetch_and_store_weather_data_from_api()
             if weather_data and weather_data.get("forecasts"):
                 insert_forecast_data(weather_data)
             else:
-                print("Failed to fetch or insert weather data.")
+                print("Failed to fetch or insert weather data from API.")
             time.sleep(REFRESH_INTERVAL) # 5분마다 갱신
 
     weather_thread = threading.Thread(target=update_weather_data_periodically)
