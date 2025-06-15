@@ -372,11 +372,15 @@ def get_base_date_time():
     print(f"[DEBUG] get_base_date_time - 최종 기준 날짜: {base_date}, 기준 시간: {base_time}")
     return base_date, base_time
 
+<<<<<<< HEAD
 def get_weather_data():
     """
     기상청 API에서 날씨 데이터를 가져와 데이터베이스에 저장합니다.
     API 호출 및 오류 처리에 집중하며, 데이터 포맷팅은 get_latest_forecasts_from_db에서 처리합니다.
     """
+=======
+def fetch_and_store_weather_data_from_api():
+>>>>>>> 30023944364a52fa174692806b6152f7f1d4e40d
     try:
         base_date, base_time = get_base_date_time()
         print(f"[DEBUG] get_weather_data - 기준 시간: {base_date} {base_time}")
@@ -397,9 +401,14 @@ def get_weather_data():
         print(f"[DEBUG] get_weather_data - API 응답 상태 코드: {response.status_code}")
         print(f"[DEBUG] get_weather_data - API 응답 내용: {response.text}") # Raw API 응답 내용 추가
 
+<<<<<<< HEAD
         if response.status_code != 200:
             print(f"[ERROR] get_weather_data - API 요청 실패: {response.status_code}")
             return None
+=======
+        print(f"Weather API Status Code: {response.status_code}")
+        print(f"Weather API Raw Response Body: {response.text}")
+>>>>>>> 30023944364a52fa174692806b6152f7f1d4e40d
 
         data = response.json()
         print(f"[DEBUG] get_weather_data - API 응답 데이터 구조: {list(data.keys())}")
@@ -439,6 +448,7 @@ def get_weather_data():
                     "time": fcst_time,
                     "weather": {}
                 }
+<<<<<<< HEAD
             forecasts_by_time[time_key]["weather"][category] = fcst_value
 
         forecast_data["forecasts"] = list(forecasts_by_time.values())
@@ -447,6 +457,24 @@ def get_weather_data():
         # 데이터베이스에 저장
         insert_forecast_data(forecast_data)
         return forecast_data
+=======
+            parsed_data[forecast_datetime_str]["weather"][category] = fcst_value
+
+        raw_forecasts = []
+        for dt_str in sorted(parsed_data.keys()):
+            raw_forecasts.append({
+                "date": parsed_data[dt_str]["date"],
+                "time": parsed_data[dt_str]["time"],
+                "weather": parsed_data[dt_str]["weather"]
+            })
+
+        return {
+            "location": {"latitude": None, "longitude": None, "grid_x": int(WEATHER_NX), "grid_y": int(WEATHER_NY)},
+            "base_reference_time": f"{base_date[:4]}-{base_date[4:6]}-{base_date[6:]} {base_time[:2]}:{base_time[2:]}",
+            "forecasts": raw_forecasts, # 원본 예측 데이터 반환
+            "message": "날씨 정보 조회 성공"
+        }
+>>>>>>> 30023944364a52fa174692806b6152f7f1d4e40d
 
     except requests.exceptions.RequestException as e:
         print(f"[ERROR] get_weather_data - API 요청 예외 발생: {str(e)}")
@@ -455,17 +483,27 @@ def get_weather_data():
         print(f"[ERROR] get_weather_data - 예상치 못한 오류 발생: {str(e)}")
         return None
 
+@app.route('/get_weather_data')
+def get_weather_data_route(): # 함수 이름 변경 (기존 get_weather_data와 충돌 방지)
+    # 데이터베이스에서 최신 날씨 정보를 가져와 반환
+    weather_data = get_latest_forecasts_from_db(WEATHER_NX, WEATHER_NY)
+    if weather_data:
+        return jsonify(weather_data)
+    else:
+        return jsonify({"error": "날씨 정보를 불러올 수 없습니다.", "message": "데이터베이스에 날씨 정보가 없거나 오류가 발생했습니다."}), 500
+
 if __name__ == '__main__':
     init_db()
     # 5분마다 날씨 데이터를 업데이트하는 스레드 시작
     def update_weather_data_periodically():
         while True:
             print("Updating weather data...")
-            weather_data = get_weather_data()
+            # 외부 API에서 데이터를 가져와 데이터베이스에 저장
+            weather_data = fetch_and_store_weather_data_from_api()
             if weather_data and weather_data.get("forecasts"):
                 insert_forecast_data(weather_data)
             else:
-                print("Failed to fetch or insert weather data.")
+                print("Failed to fetch or insert weather data from API.")
             time.sleep(REFRESH_INTERVAL) # 5분마다 갱신
 
     weather_thread = threading.Thread(target=update_weather_data_periodically)
